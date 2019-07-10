@@ -1,0 +1,5 @@
+#!/bin/bash
+sleep 15
+public=$(curl -l ifconfig.me)
+local=$(ip address show | grep 24 | awk -F+ '{print $1}' | awk '{print $2}')
+echo $public' / '$local

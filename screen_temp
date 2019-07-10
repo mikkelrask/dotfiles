@@ -1,0 +1,5 @@
+#!/bin/sh
+redshift -l 55.67594:12.56553 &&
+clear
+notify-send 'Red Shift' 'Screen temperature has been set'
+echo 'Red Shift - Screen temperature has been set'

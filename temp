@@ -1,0 +1,2 @@
+#!/bin/sh
+sensors | grep id | awk -F+ '{print $2}' | awk  '{print $1}' 

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+#Turn on lamps one by one with the python script 'lampe'
+lampe -s 1 y
+lampe -s 9 y
+lampe -s 10 y
+#Send both GUI and CLI notification to verify
+clear
+echo "Philips Hue - Lights 1, 9 and 10 are on"
+notify-send 'Philips Hue' 'Lights 1, 9 and 10 are on' -t 1500
