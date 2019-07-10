@@ -1,5 +1,6 @@
 #!/bin/bash
-sleep 15
+sleep 15 # Wait 15 seconds from boot before starting, to ensure we have connected to the Internet
+
 public=$(curl -l ifconfig.me)
 local=$(ip address show | grep 24 | awk -F+ '{print $1}' | awk '{print $2}')
 echo $public' / '$local
