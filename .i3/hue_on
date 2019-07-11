@@ -1,6 +1,7 @@
 #!/bin/sh
 # Needs the poinck/lampe for terminal app to work
 # https://github.com/poinck/lampe
+# Executed with mod+shift+y as set in .i3/config
 
 lampe -s 1 y
 lampe -s 9 y
@@ -9,5 +10,5 @@ lampe -s 10 y
 # (Does not actually verify they have been turned on,
 # simply verifies that commands are sent)
 clear
-echo "Philips Hue - Lights 1, 9 and 10 are on"
 notify-send 'Philips Hue' 'Lights 1, 9 and 10 are on' -t 1500
+echo "Philips Hue - Lights 1, 9 and 10 are on"
