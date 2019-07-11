@@ -1,0 +1,12 @@
+#!/bin/sh
+# Called in .i3/config
+
+nmcli device wifi connect YouSSIDHere password YourPasswordHere 
+sleep 3 # added a 3 second sleep to wait and see if we successfully connected
+if ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
+    notify-send 'Wifi' 'Connection established' -t 2000
+    echo "IPv4 is up"
+else
+    notify-send 'Wifi' 'Could not ping 8.8.8.8. Please check connection' -t 2000
+    echo "IPv4 is down"
+fi
