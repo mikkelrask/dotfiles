@@ -1,4 +1,5 @@
 // Dracula colors
+// by EgZvor: https://gist.github.com/EgZvor/1b07049b2529e7f4374de3994c85e527
 * {
     background: 	rgba ( 40, 42, 54, 80 % );
     current-line: 	rgba ( 68, 71, 90, 100 % );
