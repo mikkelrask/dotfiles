@@ -22,7 +22,7 @@ new_window pixel 0
 new_float normal
 
 # Log Out
-bindsym $mod+Shift+x exec blurlock
+bindsym $mod+Shift+x exec i3lock-fancy
 
 # Hide borders
 hide_edge_borders none
@@ -49,7 +49,7 @@ bindsym $mod+Shift+Return exec firefox
 bindsym $mod+Shift+q kill
 
 # start program launcher
-bindsym $mod+space exec rofi -show drun -theme sidebar
+bindsym $mod+space exec rofi -show combi -theme ~/.config/rasi/dracula.rasi
 
 # launch categorized menu
 bindsym $mod+z exec --no-startup-id morc_menu
@@ -167,21 +167,6 @@ bindsym $mod+Shift+6 move container to workspace $ws6; workspace $ws6
 bindsym $mod+Shift+7 move container to workspace $ws7; workspace $ws7
 bindsym $mod+Shift+8 move container to workspace $ws8; workspace $ws8
 
-# Open specific applications in floating mode
-for_window [title="alsamixer"] floating enable border pixel 1
-for_window [class="calamares"] floating enable border normal
-for_window [class="Clipgrab"] floating enable
-for_window [title="File Transfer*"] floating enable
-for_window [class="Galculator"] floating enable border pixel 1
-for_window [class="GParted"] floating enable border normal
-for_window [title="i3_help"] floating enable sticky enable border normal
-for_window [class="Lightdm-settings"] floating enable
-for_window [class="Lxappearance"] floating enable sticky enable border normal
-for_window [class="Manjaro Settings Manager"] floating enable border normal
-for_window [title="MuseScore: Play Panel"] floating enable
-for_window [class="Nitrogen"] floating enable sticky enable border normal
-for_window [class="Oblogout"] fullscreen enable
-
 # Make WS6 and WS7 stacked
 for_window [workspace=$ws6] layout stacked
 for_window [workspace=$ws7] layout stacked
@@ -235,7 +220,7 @@ mode "resize (arrow keys left/right)" {
 }
 
 # Lock screen
-bindsym $mod+9 exec --no-startup-id blurlock
+bindsym $mod+9 exec --no-startup-id i3lock-fancy
 
 # Autostart applications
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
@@ -243,7 +228,7 @@ exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 exec --no-startup-id xfce4-power-manager
 #exec --no-startup-id pamac-tray
 exec --no-startup-id clipit
-exec --no-startup-id xautolock -time 2 -locker blurlock
+exec --no-startup-id xautolock -time 2 -locker i3lock-fancy
 exec_always --no-startup-id ff-theme-util
 exec_always --no-startup-id fix_xcursor
 
@@ -295,7 +280,7 @@ bar {
 
 colors {
 		background $bg-color
-	    	separator #757575
+0000+++++--=_____??????++++??:	    	separator #757575
 		#                  border             background         text
 		focused_workspace  $bg-color          $bg-color          $text-color
 		inactive_workspace $inactive-bg-color $inactive-bg-color $inactive-text-color
@@ -413,3 +398,12 @@ assign [class="Pamac-manager"] $ws5
 assign [class="Caprine"] $ws7
 assign [class="discord"] $ws7
 assign [class="VirtualBox Manager"] $ws6
+
+# Open specific applications in floating window mode
+for_window [title="alsamixer"] floating enable border pixel 1
+for_window [title="File Transfer*"] floating enable
+for_window [class="GParted"] floating enable border normal
+for_window [class="Lightdm-settings"] floating enable
+for_window [class="Lxappearance"] floating enable sticky enable border normal
+for_window [class="Manjaro Settings Manager"] floating enable border normal
+for_window [class="Nitrogen"] floating enable sticky enable border normal
