@@ -1,8 +1,0 @@
-#!/bin/sh
-# Change the -l flag to your own coordinates (longitude/latitude),
-# to have redshift turn on from sun down to sun up local time
-# Check www.latlong.com for values.
-redshift -l 55.67594:12.56553 &
-clear
-notify-send 'Red Shift' 'Screen temperature has been set'
-echo 'Red Shift - Screen temperature has been set'
