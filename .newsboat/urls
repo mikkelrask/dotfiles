@@ -1,0 +1,29 @@
+"query:Linux Reddit:tags # \"content\" or title =~ \"\\[OC\\]\"" meta
+"query:Unread:unread = \"yes\"" meta
+
+https://www.reddit.com/r/archlinux/new.rss "reddit content"
+https://www.reddit.com/r/linux/new.rss "reddit content"
+https://www.reddit.com/r/ManjaroLinux/new.rss "reddit content"
+https://www.reddit.com/r/commandline/new.rss "reddit content"
+https://www.reddit.com/r/voidlinux/new.rss "reddit content"
+https://www.reddit.com/r/Gentoo/new.rss "reddit content"
+https://www.reddit.com/r/unixporn/new.rss "reddit content"
+https://news.ycombinator.com/rss news
+
+# Reddits
+https://www.reddit.com/r/copenhagen.rss "reddit" "Danmark"
+https://www.reddit.com/r/javascript.rss "reddit content"
+
+# News
+https://www.dr.dk/nyheder/service/feeds/allenyheder "Nyheder"
+https://www.version2.dk/it-nyheder/rss "Tech Nyheder"
+https://newz.dk/rss "Tech Nyheder"
+http://ing.dk/apps/pbcs.dll/oversikt?kategori=rss-it "Tech Nyheder"
+
+# Youtubers
+https://www.youtube.com/feeds/videos.xml?channel_id=UCm6yD26HlafzqNlYaK7uEaA "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCvQECJukTDE2i6aCoMnS-Vg "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCO5QSoES5yn2Dw7YixDYT5Q "YouTube"
+
+#Podcasts
+https://feeds.fireside.fm/transformator/rss
