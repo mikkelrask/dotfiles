@@ -16,11 +16,14 @@ https://www.dr.dk/nyheder/service/feeds/allenyheder "Nyheder"
 https://www.version2.dk/it-nyheder/rss "Tech Nyheder"
 https://newz.dk/rss "Tech Nyheder"
 http://ing.dk/apps/pbcs.dll/oversikt?kategori=rss-it "Tech Nyheder"
+https://n-o-d-e.net/rss/rss.xml "Tech Nyheder"
 
 # Youtubers
-https://www.youtube.com/feeds/videos.xml?channel_id=UCm6yD26HlafzqNlYaK7uEaA "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCm6yD26HlafzqNlYaK7uEaA "Youtube"
 https://www.youtube.com/feeds/videos.xml?channel_id=UCvQECJukTDE2i6aCoMnS-Vg "YouTube"
 https://www.youtube.com/feeds/videos.xml?channel_id=UCO5QSoES5yn2Dw7YixDYT5Q "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCXv-co3EYHF7aOH4A93qAHQ "YouTube"
 
 #Podcasts
-https://feeds.fireside.fm/transformator/rss
+https://feeds.fireside.fm/transformator/rss "Podcasts"
+https://feed.podbean.com/shannonmorse/feed.xml "Podcasts" "Tech Nyheder"
