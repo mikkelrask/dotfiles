@@ -1,29 +1,29 @@
 "query:Linux Reddit:tags # \"content\" or title =~ \"\\[OC\\]\"" meta
 "query:Unread:unread = \"yes\"" meta
 
-https://www.reddit.com/r/archlinux/new.rss "reddit content"
-https://www.reddit.com/r/linux/new.rss "reddit content"
-https://www.reddit.com/r/ManjaroLinux/new.rss "reddit content"
-https://www.reddit.com/r/commandline/new.rss "reddit content"
-https://news.ycombinator.com/rss news
+https://www.reddit.com/r/archlinux/new.rss "~Arch Linux, Subreddit" "reddit content"
+https://www.reddit.com/r/linux/new.rss "~Linux, Subreddit" "reddit content"
+https://www.reddit.com/r/commandline/new.rss "~Command Line, Subreddit" "reddit content"
 
 # Reddits
-https://www.reddit.com/r/copenhagen.rss "reddit" "Danmark"
-https://www.reddit.com/r/javascript.rss "reddit content"
+https://www.reddit.com/r/copenhagen/new.rss "~Copenhagen, Subreddit" "reddit" "Danmark"
+https://www.reddit.com/r/javascript/new.rss "~Javascript, Subreddit" "reddit content"
 
 # News
-https://www.dr.dk/nyheder/service/feeds/allenyheder "Nyheder"
-https://www.version2.dk/it-nyheder/rss "Tech Nyheder"
-https://newz.dk/rss "Tech Nyheder"
-http://ing.dk/apps/pbcs.dll/oversikt?kategori=rss-it "Tech Nyheder"
+https://www.dr.dk/nyheder/service/feeds/allenyheder "~DR Nyheder" "Nyheder"
+https://news.ycombinator.com/rss news "~Hacker News" 
+https://www.version2.dk/it-nyheder/rss "~Version2" "Tech Nyheder"
+https://newz.dk/rss "~Newz.dk" "Tech Nyheder"
 https://n-o-d-e.net/rss/rss.xml "Tech Nyheder"
 
 # Youtubers
-https://www.youtube.com/feeds/videos.xml?channel_id=UCm6yD26HlafzqNlYaK7uEaA "Youtube"
-https://www.youtube.com/feeds/videos.xml?channel_id=UCvQECJukTDE2i6aCoMnS-Vg "YouTube"
-https://www.youtube.com/feeds/videos.xml?channel_id=UCO5QSoES5yn2Dw7YixDYT5Q "YouTube"
-https://www.youtube.com/feeds/videos.xml?channel_id=UCXv-co3EYHF7aOH4A93qAHQ "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCm6yD26HlafzqNlYaK7uEaA "~Xisuma Says, Youtube" "Youtube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCvQECJukTDE2i6aCoMnS-Vg "~Big Think, Youtube" "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCO5QSoES5yn2Dw7YixDYT5Q "~Aperture, Youtube" "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCXv-co3EYHF7aOH4A93qAHQ "~Lew Later, Youtube" "YouTube"
 
 #Podcasts
-https://feeds.fireside.fm/transformator/rss "Podcasts"
-https://feed.podbean.com/shannonmorse/feed.xml "Podcasts" "Tech Nyheder"
+https://feeds.fireside.fm/transformator/rss "~Transformator, Podcast" "Podcasts"
+https://feed.podbean.com/shannonmorse/feed.xml "~Threadwire, Podcast" "Podcasts" "Tech Nyheder"
+https://feeds.megaphone.fm/replyall "~Reply All, Podcast" "Tech"
+http://feeds.feedburner.com/WaveformWithMkbhd "Waveform, MKBHD Podcast" "Tech Nyheder"
