@@ -1,0 +1,3 @@
+set home-page=https://ddg.gg
+set download-path=/home/raske/Downloads
+set editor-command=urxvt -e "nvim $s"
