@@ -1,3 +1,0 @@
-#!/bin/sh
-sleep 5 # Wait 15 seconds beofre executing, so we ensure there is Internet
-curl -Ss wttr.in/Copenhagen?format=1

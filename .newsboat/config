@@ -5,16 +5,17 @@ unbind-key H
 unbind-key L
 unbind-key c
 unbind-key ,
-browser "vimb %u"
 
+player "mpv %u"
+browser linkhandler
 # Feed settings
 prepopulate-query-feeds yes
 refresh-on-startup yes
 
-macro w set browser "setsid nohup mpv %u" ; open-in-browser ; set browser "vimb %u"
+macro p set browser "linkhandler %u" ; open-in-browser ; set browser "vimb %u"
 
 # bind keys
-bind-key ; macro-prefix
+bind-key , macro-prefix
 bind-key h quit
 bind-key BACKSPACE quit
 bind-key j down
@@ -24,13 +25,14 @@ bind-key H prev-feed
 bind-key L next-feed
 bind-key c toggle-show-read-feeds
 
-color background default default
-color listnormal default default
-color listnormal_unread default default
-color listfocus color16 cyan
-color listfocus_unread color16 cyan
-color info default black
-color article default default
+color background blue color0
+color listnormal color3 default
+color listnormal_unread color3 default
+color listfocus color0 color3
+color listfocus_unread color0 color3
+color info black white
+#color article default default
+
 
 highlight article "(^Feed:.*|^Title:.*|^Author:.*)" cyan default bold
 highlight article "(^Link:.*|^Date:.*)" default default

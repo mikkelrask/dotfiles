@@ -1,6 +1,0 @@
-#!/bin/bash
-# Requires lm_sensors
-# Run: 
-# sudo apt update && sudo apt install lm_sensors // sudo pacman -Syu lm_sensors before doint anything
-
-sensors | grep "Core 1:" | awk -F+ '{print $2}' | awk  '{print $1}'

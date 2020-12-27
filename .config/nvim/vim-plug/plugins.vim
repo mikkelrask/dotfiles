@@ -11,7 +11,7 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     " Better Syntax Support
     Plug 'sheerun/vim-polyglot'
     " File Explorer
-    Plug 'scrooloose/NERDTree'
+    Plug 'ms-jpq/chadtree'
     " Auto pairs for '(' '[' '{'
     Plug 'jiangmiao/auto-pairs'
 

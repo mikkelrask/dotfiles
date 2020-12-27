@@ -1,9 +1,0 @@
-#!/bin/bash
-# Simple script to display public and local IP
-# I use it in my i3blocks bar, and call it in .i3/i3blocks.conf
-
-sleep 5 # Wait 15 seconds from boot before fetching - this is to ensure we have internet
-
-public=$(curl -l ifconfig.me)
-local=$(ip address show | grep 24 | awk -F+ '{print $1}' | awk '{print $2}')
-echo $public' / '$local
