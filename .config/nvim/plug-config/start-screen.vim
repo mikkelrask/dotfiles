@@ -29,6 +29,7 @@ let g:startify_session_persistence = 1
 let g:startify_bookmarks = [
             \ { 'c': '~/.config/i3/config' },
             \ { 'i': '~/.config/nvim/init.vim' },
+            \ { 'o': '~/Documents/Opskrifter/README.md' },
             \ '~/Sites',
             \ '~/Scripts',
             \ '~/Projects',

@@ -7,6 +7,14 @@
     "json",
     "javascriptreact",
     "typescript.tsx",
-    "graphql"
-  ]
+    "graphql",
+    "css",
+    "markdown",
+    "html",
+    "python",
+    "yaml",
+    "vim"
+  ],
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true
 }
