@@ -15,12 +15,11 @@ source $HOME/.config/nvim/plug-config/sxhkd.vim
 source $HOME/.config/nvim/plug-config/vim-bujo.vim
 source $HOME/.config/nvim/plug-config/goyo.vim                              " 'No distract'-mode for vim - press Enter
 source $HOME/.config/nvim/plug-config/i3-vim-syntax.vim
+source $HOME/.config/nvim/plug-config/undotree.vim
 Plug 'mhinz/vim-signify'                                                    " Git gutter, but better (i've heard)
 Plug 'tpope/vim-fugitive'
 Plug 'HerringtonDarkholme/yats.vim'
 Plug 'shmargum/vim-sass-colors'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'kien/ctrlp.vim'
 Plug 'mattn/emmet-vim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'kevinhwang91/rnvimr', {'do': 'make sync'}

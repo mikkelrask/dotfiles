@@ -2,6 +2,9 @@ map <leader>n <cmd>CHADopen<cr>                        		" File navigation in th
 map <leader>f :CocCommand fzf-preview.ProjectFiles<cr> 		" Fuzzy finder in your current directory
 nnoremap <silent> <leader> :WhichKey '<leader>'<CR> 			" Opens \"Which key\" as a menu in the bottom
 
+" FZF Ctrl+P
+map <C-p> :FZF<CR>
+
 " Copy Paste
 vnoremap <C-c> "*y :let @+=@*<CR>
 map <C-v> "*P

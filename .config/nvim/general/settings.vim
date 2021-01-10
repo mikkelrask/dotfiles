@@ -2,7 +2,7 @@ syntax enable                                   " Enables syntax highlighting
 set hidden                                      " Required to keep multiple buffers open 
 set smarttab
 set cindent
-set tabstop=2
+set tabstop=4
 set shiftwidth=2
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
@@ -15,11 +15,16 @@ set shiftwidth=2
 set autoindent
 set smartindent
 set laststatus=0
+set noswapfile
 set nobackup
 set nowritebackup
 set t_Co=256
 set wrap
 set linebreak
+set colorcolumn=80
+set incsearch
+set undodir=~/.config/nvim/undodir
+set cmdheight=2
 
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
