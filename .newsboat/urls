@@ -15,10 +15,9 @@ https://www.dr.dk/nyheder/service/feeds/allenyheder "~DR Nyheder" "Nyheder"
 https://news.ycombinator.com/rss news "~Hacker News" 
 https://www.version2.dk/it-nyheder/rss "~Version2" "Tech Nyheder"
 https://newz.dk/rss "~Newz.dk" "Tech Nyheder"
-http://itwatch.dk/rss/seneste.rss "~ITWatch.dk" "Tech Nyheder"
 https://n-o-d-e.net/rss/rss.xml "Tech Nyheder"
 https://www.vice.com/en/rss/topic/tech?locale=en_us "~Motherboard" "Tech Nyheder"
-
+  https://www.reddit.com/r/TechNewsToday/new.rss "~TechNewsToday" "Tech Nyheder"
 # Youtubers
 https://www.youtube.com/feeds/videos.xml?channel_id=UCm6yD26HlafzqNlYaK7uEaA "~Xisuma Says, Youtube" "Youtube"
 https://www.youtube.com/feeds/videos.xml?channel_id=UCvQECJukTDE2i6aCoMnS-Vg "~Big Think, Youtube" "YouTube"
