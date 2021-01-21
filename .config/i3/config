@@ -7,16 +7,17 @@ floating_modifier $mod
 # key bind
 bindsym $mod+Return exec --no-startup-id kitty
 bindsym $mod+Shift+n exec --no-startup-id bash -c "kitty newsboat"
-bindsym $mod+Shift+m exec --no-startup-id bash -c "kitty neomutt"
+bindsym $mod+Shift+m exec --no-startup-id bash -c "mutt"
 bindsym $mod+Ctrl+w exec --no-startup-id dmenu-wifi
 bindsym Ctrl+Escape exec --no-startup-id "kitty -e bashtop"
 bindsym $mod+w exec --no-startup-id "firefox"
 bindsym $mod+Ctrl+x exec --no-startup-id confirm "Do you want to shutdown?" /home/raske/bin/shutdown.sh
 bindsym $mod+Ctrl+l exec --no-startup-id i3lock-fancy
-bindsym $mod+Ctrl+e exec --no-startup-id funcedit-menu
+bindsym $mod+e exec --no-startup-id funcedit-menu
 bindsym $mod+Shift+e exec --no-startup-id /home/raske/bin/dmenuunicode
 bindsym $mod+n exec --no-startup-id kitty --name="notetaker" /home/raske/bin/notetaker
 bindsym $mod+Shift+p exec --no-startup-id passmenu
+bindsym $mod+Shift+v exec --no-startup-id "kitty -e nvim"
 
 # Autostart
 exec --no-startup-id sourcecolors 
@@ -28,6 +29,7 @@ exec --no-startup-id spotifyd
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 exec --no-startup-id docker run -d -P -p 80:80 startpage:v1
 exec --no-startup-id twmnd &
+exec --no-startup-id xmodmap /home/raske/.config/Xmodmap/Xmodmap
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -49,29 +51,18 @@ bindsym $mod+Ctrl+p exec --no-startup-id hue_off
 # Print screen
 bindsym Print exec --no-startup-id flameshot full --path .
 bindsym Shift+Print exec --no-startup-id flameshot gui
+
 # change focus
 bindsym $mod+j focus left
 bindsym $mod+k focus down
 bindsym $mod+l focus up
 bindsym $mod+ae focus right
 
-# alternatively, you can use the cursor keys:
-bindsym $mod+Left focus left
-bindsym $mod+Down focus down
-bindsym $mod+Up focus up
-bindsym $mod+Right focus right
-
 # move focused window
 bindsym $mod+Shift+j move left
 bindsym $mod+Shift+k move down
 bindsym $mod+Shift+l move up
 bindsym $mod+Shift+ae move right
-
-# alternatively, you can use the cursor keys:
-bindsym $mod+Shift+Left move left
-bindsym $mod+Shift+Down move down
-bindsym $mod+Shift+Up move up
-bindsym $mod+Shift+Right move right
 
 # split in horizontal orientation
 bindsym $mod+h split h
@@ -83,9 +74,9 @@ bindsym $mod+v split v
 bindsym $mod+f fullscreen toggle
 
 # change container layout (stacked, tabbed, toggle split)
-bindsym $mod+s layout stacking
-bindsym $mod+t layout tabbed
-bindsym $mod+e layout toggle split
+bindsym Ctrl+$mod+s layout stacking
+bindsym Ctrl+$mod+t layout tabbed
+bindsym Ctrl+$mod+e layout toggle split
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -140,8 +131,6 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
-# exit i3 (logs you out of your X session)
-#bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -151,10 +140,10 @@ mode "resize" {
         # Pressing right will grow the window’s width.
         # Pressing up will shrink the window’s height.
         # Pressing down will grow the window’s height.
-        bindsym j resize shrink width 10 px or 10 ppt
-        bindsym k resize grow height 10 px or 10 ppt
-        bindsym l resize shrink height 10 px or 10 ppt
-        bindsym ae resize grow width 10 px or 10 ppt
+        bindsym l resize shrink width 3 px or 3 ppt
+        bindsym k resize grow height 3 px or 3 ppt
+        bindsym j resize shrink height 3 px or 3 ppt
+        bindsym h resize grow width 3 px or 3 ppt
 
         # same bindings, but for the arrow keys
         bindsym Left resize shrink width 10 px or 10 ppt
@@ -177,13 +166,13 @@ bindsym $mod+r mode "resize"
 #}
 
 smart_borders on
-smart_gaps on
-gaps inner 10
+# smart_gaps on
+# gaps inner 10
 
 client.focused              black black green black black
 #client.focused_inactive     $bg $bg $fg $bg $bg          
 #client.unfocused            $bg $bg $fg $bg $bg          
-#client.urgent               $bg $bg $fg $bg $bg          
+client.urgent               $bg $bg $fg $bg $bg          
 #client.placeholder          $bg $bg $fg $bg $bg          
 #client.background           $bg 
 
@@ -191,19 +180,18 @@ client.focused              black black green black black
 workspace_auto_back_and_forth yes
 
 # Auto assign
-for_window [class=".*"] border pixel 1 focus
-assign [class="firefox"] $ws2
-for_window [window_role="browser"] focus
-for_window [class="Vimb"] fullscreen enable
-for_window [title="notetaker"] floating enable resize set 800 600
-assign [class="igdm"] $ws3
+assign [class="GeForce NOW"] $ws6
 assign [class="IGdm"] $ws3
-assign [class="vscodium"] $ws4
-assign [class="geforce now"] $ws6
-assign [class="Geforce Now"] $ws6
+assign [class="ProtonMail Bridge"] $ws9
+assign [class="firefox"] $ws2
+assign [class="igdm"] $ws3
 assign [class="minecraft-launcher"] $ws6
-assign [class="mpv"] $ws6
-for_window [class="mpv"] fullscreen enable
+assign [class="vscodium"] $ws4
+for_window [class=".*"] border pixel 1
+for_window [class="GeForce NOW"] fullscreen enable border 0
 for_window [class="Minecraft*"] fullscreen enable
-
+for_window [class="Vimb"] fullscreen enable
+for_window [class="mpv"] fullscreen enable
+for_window [title="notetaker"] floating enable resize set 800 600
+for_window [window_role="browser"] focus
 
