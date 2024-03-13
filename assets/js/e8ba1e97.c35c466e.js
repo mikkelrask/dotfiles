@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdotfile_docs=self.webpackChunkdotfile_docs||[]).push([[801],{3709:s=>{s.exports=JSON.parse('{"label":"dotfiles","permalink":"/docs/tags/dotfiles","allTagsPath":"/docs/tags","count":1,"items":[{"id":"packages/stow/index","title":"GNU Stow","description":"Install","permalink":"/docs/packages/stow/"}],"unlisted":false}')}}]);
