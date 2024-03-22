@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdotfile_docs=self.webpackChunkdotfile_docs||[]).push([[3930],{9550:e=>{e.exports=JSON.parse('{"permalink":"/dotfiles/blog/tags/hola","page":1,"postsPerPage":10,"totalPages":1,"totalCount":1,"blogDescription":"Blog","blogTitle":"Blog"}')}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdotfile_docs=self.webpackChunkdotfile_docs||[]).push([[7610],{4777:t=>{t.exports=JSON.parse('{"title":"Getting started","slug":"/category/getting-started","permalink":"/dotfiles/docs/category/getting-started","navigation":{"next":{"title":"Before installing","permalink":"/dotfiles/docs/getting-started/download-repo"}}}')}}]);
