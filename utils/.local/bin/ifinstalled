@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+DISTRO=$(lsb_release -si)
+
+function arch {
+	for x in "$@"; do
+		if ! which "$x" >/dev/null 2>&1 && ! pacman -Qq "$x" >/dev/null 2>&1; then
+	 		notify-send "📦 $x" "must be installed for this function." && exit 1 ;
+		fi
+	done
+}
+
+function ubuntu {
+	for x in "$@"; do
+	    # Check if the command is not in the PATH and not installed via dpkg
+	    if ! which "$x" >/dev/null 2>&1 && ! dpkg -s "$x" >/dev/null 2>&1; then
+	        # If not found, display a notification and exit with status 1
+          echo "nope"
+	        notify-send "📦 $x" "must be installed for this function." && exit 1;
+	    fi
+	done
+}
+
+function fedora {
+	for x in "$@"; do
+	    # Check if the command is not in the PATH and not installed via dnf
+	    if ! which "$x" >/dev/null 2>&1 && ! dnf list installed "$x" >/dev/null 2>&1; then
+	        # If not found, display a notification and exit with status 1
+	        notify-send "📦 $x" "must be installed for this function." && exit 1;
+	    fi
+	done
+}
+
+if [ '$DISTRO' == 'Arch' ]; then
+	arch "$@"
+elif [ '$DISTRO' == 'Fedora' ]; then
+	fedora "$@"
+else
+	ubuntu "$@"
+fi

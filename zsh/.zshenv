@@ -1,0 +1,10 @@
+export BROWSER=waterfox
+export TERM=xterm-kitty
+export FILES=thunar
+export VISUAL=code
+export EDITOR=nvim
+export PLAYER=mpv
+export DOTFILES_HOMEDIR=$HOME/Documents/dotfiles
+export XDG_CONFIG_HOME=$HOME/.config
+export THEME=rose-pine
+export WALLPAPER=/home/mr/Pictures/rose-pine/rose_pine_maze.png

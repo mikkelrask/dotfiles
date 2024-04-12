@@ -1,0 +1,6 @@
+
+visualizer_sync_interval  "0"
+visualizer_type           "wave"
+visualizer_autoscale      "yes"
+visualizer_look           "●▮"
+

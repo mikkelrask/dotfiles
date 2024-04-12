@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# Settings (set in minutes)
+WORK_FOR=45
+BREAK=10
+
+notify-send "Pomodoro started." "Work concentrated for 25 minutes."
+message=$1
+t=''
+b=''
+
+MATH() {
+  # Convert minuts to seconds
+  $w=$(expr $WORK_FOR * 60 | bc)
+  $b=$(expr $BREAK * 60 | bc)
+}
+
+
+MAINLOOP() {
+  while true
+  do
+    clear
+    cowsay "${message:-25 minutes}"
+    sleep $w
+    notify-send "Issa time" "Get some rest"
+    mpv --quiet $PWD/pomodoro.mp3
+    clear
+    cowsay "Take a break!"
+    sleep $b
+    rotify-send "Get to it!" "Time to work!"
+    mpv --quiet $PWD/pomodoro.mp3
+  done
+}
+INSTALL_DEPS() {
+  $(read -p "Depency not met - do you wish to install the needed deps? (y/n)" -n 1 ANS)
+  if [ "$ANS" ]; then
+    [ "$ANS" != 'y' ] && exit 1
+    doas dnf install cowsay -y
+  fi
+  [ "$?" != 0 ] && exit 1
+}
+
+./ifinstalled cowsay
+[ $? != 0 ] && INSTALL_DEPS
+
+MATH
+MAINLOOP

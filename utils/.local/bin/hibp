@@ -1,0 +1,67 @@
+#!/bin/bash
+# Have I Been Pwned API lookup
+#
+# Easy bash scrip to look up if a password has been leaked in any data breaches.
+# It uses the HIBP API, where we only provide the first five digits of a hashed 
+# password, and the API then returns all of the result for those five digits. 
+# Then we're able to grep through those, with the remaining characters from 
+# the SHA1 hash, making sure our password is never sent to any server, or leave
+# our computer in general. 
+# 
+# You can pass your password as an argument, but in that case I suggest that your
+# run the command with a space beforehand, to leave that command out of your bash
+# history as well, how ever I simply suggest to run the command without any.
+#
+# If you password turns out to have been leaked, a new 40 digit randomized password
+# will be sent to your clip board.
+
+password=$1
+
+getPassword(){
+	if [ -z "$password" ] 
+	then
+		clear
+		printf "$(figlet "HAVE I BEEN PWNED")\n--------------------------------\n\n"
+		echo "Password to lookup:"
+		read password
+fi
+}
+
+getHash(){
+	hash=$(echo -n "$password" | openssl sha1)
+	hash=${hash:9}
+	range=${hash:0:5}
+	remainder=${hash:6}
+}
+
+apiRequest(){
+	apiUrl="https://api.pwnedpasswords.com/range/$range"
+	filename="$PWD/.pwned.hash"
+	results=$(curl -s $apiUrl > $filename && grep -i $remainder $filename)
+	noTimes="${results:36}"
+	if [ -z "$results" ]
+	then
+		clear
+		printf "$(figlet "NOT PWNED")\n--------------------------------\n\n"
+		printf "Keep up the good work!"
+	else
+		clear
+		printf "$(figlet "YOU HAVE BEEN PWNED")\n--------------------------------\n\n"
+		printf "Oof...!\nThe password you input has been leaked!\n\nTimes found: $noTimes\nYou might want to change that!\n\n"
+		newPassword
+	fi
+}
+
+clean(){
+	rm $filename
+}
+
+newPassword(){
+	PASSWORD=$(openssl rand -base64 32)
+	echo ${PASSWORD%??} | xclip -selection c
+	echo "A new random password has been copied to your clip board."
+}
+getPassword
+getHash
+apiRequest
+clean

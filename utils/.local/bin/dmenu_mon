@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+CHOICE="$(printf '%s\n' "Dual (3440x1440+1440x2560)" "Dual for gaming (2560x1440+1440x2560)" "Single" | dmenu -i -l -p Monitor)"
+echo "$CHOICE"

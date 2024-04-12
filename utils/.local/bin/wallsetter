@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+. "$HOME/.zshenv"
+
+$HOME/.local/bin/ifinstalled dmenu feh dunst 
+[ $? -ne 0 ] && exit 1
+
+OPTION=$(ls "$HOME/Pictures/wallpaper/" | dmenu -l 10 -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724')
+
+if [ -z "$OPTION" ]; then 
+  exit 0
+fi
+
+feh --bg-fill "$HOME/Pictures/$THEME/$OPTION"
+notify-send -i "$HOME/.local/bin/info.png" -c info -a "wallsetter" "wallsetter" "$OPTION set as wallpaper"
+
+OPTION_WITH_PATH="$HOME/Pictures/rose-pine/$OPTION"
+sed -i "s|WALLPAPER=.*|WALLPAPER=$OPTION_WITH_PATH|g" "$HOME/.zshenv" || notify-send -c warning -i "$HOME/.local/bin/warn.png" -a "wallsetter" "wallsetter" "Could not set $WALLPAPER variable. Wallpaper setting will not persist after reboot/relog"

@@ -1,0 +1,48 @@
+"query:Linux Reddit:tags # \"content\" or title =~ \"\\[OC\\]\"" meta
+"query:Unread:unread = \"yes\"" meta
+
+https://www.reddit.com/r/archlinux/new.rss "~Arch Linux, Subreddit" "reddit content"
+https://www.reddit.com/r/linux/new.rss "~Linux, Subreddit" "reddit content"
+https://www.reddit.com/r/commandline/new.rss "~Command Line, Subreddit" "reddit content"
+
+# Reddits
+https://www.reddit.com/r/copenhagen/new.rss "~Copenhagen, Subreddit" "reddit" "Danmark"
+https://www.reddit.com/r/unixporn/new.rss "~/r/unixporn" "reddit content"
+
+
+# News
+https://www.dr.dk/nyheder/service/feeds/allenyheder "~DR Nyheder" "Nyheder"
+https://news.ycombinator.com/rss news "~Hacker News" 
+https://www.version2.dk/it-nyheder/rss "~Version2" "Tech Nyheder"
+https://newz.dk/rss "~Newz.dk" "Tech Nyheder" 
+https://n-o-d-e.net/rss/rss.xml "Tech Nyheder"
+https://www.vice.com/en/rss/topic/tech?locale=en_us "~Motherboard" "Tech Nyheder"
+  https://www.reddit.com/r/TechNewsToday/new.rss "~TechNewsToday" "Tech Nyheder"
+
+# Blogs
+https://blog.massdriver.cloud/index.xml "~Massdriver Blog" "Tech"
+https://davidwalsh.name/feed "~David Walsch" "Tech"
+https://blog.codinghorror.com/rss/ "~Coding Horror" "Coding"
+https://levelup.gitconnected.com/feed "~Level Up Coding" "Coding"
+https://medium.com/feed/@johndanielraines "~John Raines" "Coding"
+
+# Youtubers
+https://www.youtube.com/feeds/videos.xml?channel_id=UCm6yD26HlafzqNlYaK7uEaA "~Xisuma Says, Youtube" "Youtube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCvQECJukTDE2i6aCoMnS-Vg "~Big Think, Youtube" "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCO5QSoES5yn2Dw7YixDYT5Q "~Aperture, Youtube" "YouTube"
+https://www.youtube.com/feeds/videos.xml?channel_id=UCXv-co3EYHF7aOH4A93qAHQ "~Lew Later, Youtube" "YouTube"
+https://www.jeffgeerling.com/blog.xml "~Jeff Geerling, Blog" "YouTube"
+
+
+https://simonwillison.net/atom/everything/ "~Simon Williamson" "Coding"
+https://infinitedigits.co/index.xml "~Zach Scholl, InfiniteDigits" "Tinkering" 
+
+#Podcasts
+https://feeds.fireside.fm/transformator/rss "~Transformator, Podcast" "Podcasts"
+https://feed.podbean.com/shannonmorse/feed.xml "~Threadwire, Podcast" "Podcasts" "Tech Nyheder"
+https://feeds.megaphone.fm/replyall "~Reply All, Podcast" "Tech"
+http://feeds.feedburner.com/WaveformWithMkbhd "Waveform, MKBHD Podcast" "Tech Nyheder"
+https://www.spreaker.com/show/4286413/episodes/feed "~Elektronista, Podcast" "Podcasts"
+
+#ME
+https://mikkelrask.github.io/rss.xml "~mikkelrask.github.io" "Blog"

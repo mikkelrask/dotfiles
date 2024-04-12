@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+function TAILSCALE {
+  TS_UP=$(ip link | grep -i "tailscale")
+  if [ "$TS_UP" ]; then 
+    echo "Shutting down tailnet.."
+    tailscale down
+  fi
+}
+function TAILESCALE_RECONNECT {
+  doas tailscale up
+}
+
+function GAMEMODE {
+  RANDR=$(where xrandr)
+  STATUS="$("$RANDR" | grep -w connected | grep 3440)"
+  if [ $? != 0]; then
+    "$HOME/.screenlayout/gamestreaming"
+    echo "Setting aspect ratio to 16x9.. (2560x1440)"
+  fi
+}
+function DESKTOPMODE {
+  "$HOME/.screenlayout/extra-left-vertical.sh"
+  echo "Re-setting DP-0 aspect ratio to 21:10... (3440x1440)"
+}
+
+function MUTE {
+  amixer set Master mute
+  echo "Muting host..."
+}
+
+function LAUNCH {
+  LOCATION="$(which steam)"
+  echo "Launching ..."
+  "$LOCATION" -gamepadui %u -forcedesktopscaling 1
+}
+
+TAILSCALE
+MATCH_RESOLUTION
+MUTE
+LAUNCH
+DESKTOPMODE
+TAILSCALE_RECONNECT
+
