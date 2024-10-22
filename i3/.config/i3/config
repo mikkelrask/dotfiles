@@ -1,13 +1,16 @@
 # Mod1 == Alt
-# Mod4 == Super
 set $mod Mod1
+# Mod4 == Super
 set $super Mod4
 
 set $browser waterfox
 set $terminal kitty 
 set $filemanager pcmanfc
-exec --no-startup-id source /home/mr/.zshenv
+set $vertical_mon DP-0.1
+set $main_mon DP-0.8
+set $mini_mon HDMI-1
 
+exec --no-startup-id source /home/mr/.zshenv
 
 # set primary Rosé Pine colorscheme colors
 set $base           #191724
@@ -26,76 +29,50 @@ set $highlightlow   #21202e
 set $highlightmed   #403d52
 set $highlighthigh  #524f67
 
-# Font for window titles. Will also be used by the bar unless a different font
-# is used in the bar {} block below.
 font pango:FantasqueSansM Nerd Font Propo 14
 
-# This font is widely installed, provides lots of unicode glyphs, right-to-left
-# text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font pango:DejaVu Sans Mono 8
-
-# Start XDG autostart .desktop files using dex. See also
 # https://wiki.archlinux.org/index.php/XDG_Autostart
+exec --no-startup-id /usr/bin/tailscale up
+exec --no-startup-id python /home/mr/Repos/volume-server/server.py
+exec --no-startup-id /usr/bin/lxpolkit
+#exec --nostartup-id /usr/bin/screenkey
+exec_always --no-startup-id bash /home/mr/.screenlayout/default.sh
+exec --no-startup-id /usr/bin/picom -b
 exec --no-startup-id dex --autostart --environment i3
 exec --no-startup-id dunst -config ~/.config/dunst/dunstrc
 exec --no-startup-id unclutter -root
-exec --no-startup-id bash /home/mr/.screenlayout/extra-left-vertical.sh 
+
+exec --no-startup-id /usr/bin/blueman-applet &
+exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+exec --no-startup-id nm-applet
 exec_always --no-startup-id feh --bg-fill "$WALLPAPER"
-exec_always --no-startup-id /usr/bin/setxkbmap -layout dk
 exec --no-startup-id /home/mr/.local/bin/mpd
 exec --no-startup-id /home/mr/.config/polybar/launch.sh --docky
+#exec --no-startup-id /usr/bin/steam -silent %U 
+exec_always --no-startup-id bash -c "sleep 2 && /usr/bin/setxkbmap dk"
+exec --no-startup-id sunshine
 
-# The combination of xss-lock, nm-applet and pactl is a popular choice, so
-# they are included here as an example. Modify as you see fit.
-
-# xss-lock grabs a logind suspend inhibit lock and will use i3lock to lock the
-# screen before suspend. Use loginctl lock-session to lock your screen.
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
-
-# NetworkManager is the most popular way to manage wireless networks on Linux,
-# and nm-applet is a desktop environment-independent system tray GUI for it.
-#exec --no-startup-id nm-applet
-
-# Use pactl to adjust volume in PulseAudio.
 set $refresh_i3status killall -SIGUSR1 i3status
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10% && $refresh_i3status
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10% && $refresh_i3status
+bindsym XF86AudioRaiseVolume exec --no-startup-id volume up
+bindsym XF86AudioLowerVolume exec --no-startup-id volume down
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
 bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
-#exec --no-startup-id /usr/bin/steam -silent %U 
-exec --no-startup-id /usr/bin/tailscale up
-
-# Use Mouse+$mod to drag floating windows to their wanted position
-floating_modifier $mod
-
-# start a terminal
+bindsym ctrl+Shift+Return exec --no-startup-id layoutchanger.sh
 bindsym $mod+Return exec $terminal
-
-# start a browser
-bindsym $mod+w exec $BROWSER
-
-# start a file manager
+bindsym $mod+w exec --no-startup-id $BROWSER 
 bindsym $mod+t exec --no-startup-id pcmanfm 
-
-# kill focused window
 bindsym $mod+Shift+q kill
-
-# start dmenu (a program launcher)
 bindsym $mod+d exec --no-startup-id dmenu_run -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724'
-bindsym $mod+Shift+d exec --no-startup-id dmenu_run_desktop -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724'
+bindsym $super+Space exec --no-startup-id dmenu_run -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724'
+bindsym $mod+Shift+d exec --no-startup-id $HOME/.config/polybar/docky/scripts/launcher.sh  -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724'
 bindsym $mod+space exec --no-startup-id dmenu_run -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724'
 bindsym $mod+ctrl+space exec --no-startup-id dmenu run -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724'
 bindsym $mod+e exec --no-startup-id $HOME/.local/bin/dmenuunicode
 bindsym $mod+ctrl+x exec --no-startup-id $HOME/.local/bin/dmenu_power 
 bindsym $mod+ctrl+w exec --no-startup-id $HOME/.local/bin/wallsetter
-# A more modern dmenu replacement is rofi:
-# bindcode $mod+40 exec "rofi -modi drun,run -show drun"
-# There also is i3-dmenu-desktop which only displays applications shipping a
-# .desktop file. It is a wrapper around dmenu, so you need that installed.
-# bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 bindsym ctrl+Escape exec --no-startup-id kitty -e btop
+bindsym ctrl+shift+p exec --no-startup-id shotgun -g "$(hacksaw -f)"
 
-for_window [class="^.*"] border pixel 1 
 
 
 # change focus
@@ -151,27 +128,21 @@ bindsym $mod+a focus parent
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws1 "1"
-set $ws2 "2"
-set $ws3 "3"
-set $ws4 "4"
-set $ws5 "5"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
-set $ws9 "9"
-set $ws10 "10"
 
-set $ws1 "1  tty "
-set $ws2 "2  web "
-set $ws3 "3  msg "
-set $ws4 "4  doc "
-set $ws5 "5  code "
-set $ws6 "6   desk "
-set $ws7 "7  game "
-set $ws8 "8   caff "
-set $ws9 "9  neo "
-set $ws10 "10   conf "
+floating_modifier $mod
+
+
+for_window [class="^.*"] border pixel 1 
+set $ws1 "1:  "
+set $ws2 "2:  "
+set $ws3 "3:  "
+set $ws4 "4:  "
+set $ws5 "5:  "
+set $ws6 "6:   "
+set $ws7 "7:  "
+set $ws8 "8:   "
+set $ws9 "9:  "
+set $ws10 "10:   "
 
 
 # switch to workspace
@@ -198,12 +169,49 @@ bindsym $mod+Shift+8 move container to workspace number $ws8
 bindsym $mod+Shift+9 move container to workspace number $ws9
 bindsym $mod+Shift+0 move container to workspace number $ws10
 
+# Assign workspaces to specific outputs DP-0.8 and DP-0.1
+workspace $ws1 output $vertical_mon
+workspace $ws2 output $main_mon
+workspace $ws3 output $vertical_mon
+workspace $ws4 output $main_mon
+workspace $ws5 output $main_mon
+workspace $ws6 output $main_mon
+workspace $ws7 output $main_mon
+workspace $ws8 output $main_mon
+workspace $ws9 output $mini_mon
+workspace $ws10 output $vertical_mon
+
+# Assign apps to workspaces
+assign [class="waterfox"] $ws2
+assign [class="obsidian"] $ws4
+assign [class="Slack"] $ws3
+assign [class="vesktop"] $ws3
+assign [class="whatsapp-desktop-linux"] $ws3
+assign [class="PrismLauncher"] $ws7
+assign [class="heroic"] $ws7
+assign [class="cartridges"] $ws7
+assign [class="KiCad"] $ws6
+assign [class="cantata"] $ws6
+assign [class="figma-linux"] $ws6
+assign [class="Code"] $ws5
+assign [class="Spotify"] $ws6
+assign [class="steam"] $ws7
+assign [class="socialclubhelper.exe"] $ws7 
+assign [class="launcher.exe"] $ws7 
+assign [class="dev.zed.Zed-Dev"] $ws5
+assign [class="krita"] $ws6
+
+for_window [urgent="latest"] focus
+for_window [class="steam"] focus floating enable
+for_window [class="socialclubhelper.exe"] floating enable
+for_window [class="rdr2.exe"] focus fullscreen enable
+for_window [class="launcher.exe"] floating enable
 # reload the configuration file
-bindsym $mod+Shift+c reload
+bindsym ctrl+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+#bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -253,3 +261,4 @@ client.urgent            $text     $base $text  $love      $love
 client.placeholder       $base     $base $text  $overlay   $overlay
 client.background        $base
 
+exec_always --no-startup-id /usr/bin/setxkbmap -option ""
