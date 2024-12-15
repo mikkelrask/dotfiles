@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+return_dir=$(pwd)
+music_dir="/pool/Music"
+
+yt_dlp_urls=(
+  "*bandcamp.com*"
+  "*youtube.com*"
+  "*soundcloud.com*"
+)
+
+
+remove_id_inside_brackets() {
+  local title="$1"
+  echo "${title//\[[0-9]*\]/}"
+}
+dl() {
+  local url="$1"
+  local use_yt_dlp=false
+
+  for pattern in "${yt_dlp_urls[@]}"; do
+    if [[ "$url" == *$pattern* ]]; then
+      use_yt_dlp=true
+      break
+    fi
+  done
+
+  if $use_yt_dlp; then
+    start_dir=$(pwd)
+    echo "Media detected - using yt-dlp"
+    read -p "Artist: " artist
+    read -p "Album: " album
+    if [ -d "$music_dir/${artist}/${album}" ]; then
+      echo "Album directory already exists."
+      read -p "Do you want to overwrite it? (y/n): " overwrite
+      [ "$overwrite" != "y" ] && cd "$start_dir" && exit 0
+      cd "$music_dir/${artist}/${album}"
+    elif [[ -d "$music_dir/${artist}" ]]; then
+      mkdir -pv "$music_dir/${artist}/${album}"
+      cd "$music_dir/${artist}/${album}"
+    fi
+    read -p "Year: " year
+    read -p "URL to album art work (leave empty to skip): " cover_url
+    [ "$cover_url" ] && wget -cq --progress bar -O "$music_dir/${artist}/${album}/cover.jpg" "$cover_url"
+
+    yt-dlp -x "$@" -o "$music_dir/${artist}/${album}/%(title)s.%(ext)s"
+    if [ "$?" != 0 ]; then
+      echo "Error: yt-dlp failed to download the file(s)."
+      cd "$start_dir" && exit 1
+    fi
+
+    # Find all supported files and tag them with eyeD3
+    cd "$music_dir/${artist}/${album}"
+    find -maxdepth 1 \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.opus" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.ogg" -o -iname "*.webm" \) -exec eyeD3 --add-image="$music_dir/${artist}/${album}/cover.jpg":FRONT_COVER -a "$artist" -b "$artist" -A "$album" -Y "$year" {} + &>/dev/null
+
+    if [ "$?" != 0 ]; then
+      echo "Error: eyeD3 failed to tag file(s)."
+      cd "$start_dir" && exit 1
+    fi
+
+    cd "$start_dir" && exit 0
+  else
+    wget -cq --progress bar "$@"
+  fi
+}
+
+# Call the function with command line arguments
+dl "$@"

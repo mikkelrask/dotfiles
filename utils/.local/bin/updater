@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+CONFIG_FILE="/home/mr/.nixos/hosts/dolores/configuration.nix"
+INITIAL_HASH="$(md5sum $CONFIG_FILE)"
+
+echo "Editing $bold$CONFIG_FILE$normal requires elevated priveliges. " && doas $(which nvim) "$CONFIG_FILE"
+
+NEW_HASH="$(md5sum $CONFIG_FILE)"
+
+if [ "$NEW_HASH" = "$INITIAL_HASH" ]; then
+  exit 0
+else
+  read -p "$bold$CONFIG_FILE$normal was changed - test config? (y/n) " -n 1 REBUILD
+  [[ $REBUILD == "y" ]] && doas nixos-rebuild test --flake /etc/nixos#dolores || printf " Exit.\n"
+fi
