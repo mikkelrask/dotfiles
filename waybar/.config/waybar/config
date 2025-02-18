@@ -1,0 +1,86 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 28,
+  "spacing": 4,
+  "exclusive": true,
+  "gtk-layer-shell": true,
+  "passthrough": false,
+  "fixed-center": true,
+  "modules-left": ["hyprland/workspaces", "hyprland/window"],
+  "modules-center": ["custom/mpd"],
+  "modules-right": [
+    "cpu",
+    "pulseaudio",
+    "clock",
+    "clock#simpleclock",
+    "tray",
+    "battery",
+    "custom/power",
+  ],
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "format-icons": {
+      "1" : "  ",
+      "2" : " ",
+      "3" : " 󰭹 ",
+      "4" : " 󰈙 ",
+      "5" : "  ",
+      "6" : " 󰧨 ",
+      "7" : " 󱎓 ",
+      "8" : "   ",
+      "9" : "   "
+    }
+  },
+  "battery": {
+      "format": "{icon} {capacity}% ",
+      "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰂀", "󰂂", "󰁹"],
+  },
+  "tray": {
+    "show-passive-items": true,
+    "spacing": 8,
+  },
+  "clock#simpleclock": {
+    "tooltip": false,
+    "format": "  {:%H:%M}",
+  },
+  "clock": {
+    "format": "  {:L%a %d %b}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+  },
+  "cpu": {
+    "format": "  {usage}%",
+    "tooltip": true,
+    "interval": 1,
+  },
+  "memory": {
+    "format": "  {used:0.2f}G",
+  },
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "  muted",
+    "format-icons": {
+      "headphone": " ",
+      "hands-free": "󰂑",
+      "headset": "󰂑",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": [" ", " ", " "],
+    },
+    "on-click": "pavucontrol",
+  },
+  "custom/logo": {
+    "format": "",
+    "tooltip": false,
+  },
+  "custom/sep": {
+    "format": "|",
+    "tooltip": false,
+  },
+  "custom/power": {
+    "tooltip": false,
+    "on-click": "confirm 'Shutdown system? (yes/no)' ''",
+    "format": "⏻ ",
+  },
+}
