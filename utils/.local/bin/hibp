@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env
 # Have I Been Pwned API lookup
 #
 # Easy bash scrip to look up if a password has been leaked in any data breaches.
@@ -21,7 +21,7 @@ getPassword(){
 	if [ -z "$password" ] 
 	then
 		clear
-		printf "$(figlet "HAVE I BEEN PWNED")\n--------------------------------\n\n"
+		printf "$(echo "HAVE I BEEN PWNED")\n--------------------------------\n\n"
 		echo "Password to lookup:"
 		read password
 fi

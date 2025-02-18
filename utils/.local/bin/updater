@@ -3,16 +3,17 @@
 bold=$(tput bold)
 normal=$(tput sgr0)
 
-CONFIG_FILE="/home/mr/.nixos/hosts/dolores/configuration.nix"
-INITIAL_HASH="$(md5sum $CONFIG_FILE)"
+CONFIG_DIR="$HOME/.nixos"
+cd $CONFIG_DIR
+INITIAL_HASH="$(tar -cf - . | md5sum | awk '{print $1}')"
 
-echo "Editing $bold$CONFIG_FILE$normal requires elevated priveliges. " && doas $(which nvim) "$CONFIG_FILE"
+$EDITOR .
+FINAL_HASH="$(tar -cf - . | md5sum | awk '{print $1}')"
 
-NEW_HASH="$(md5sum $CONFIG_FILE)"
+[[ "$INITIAL_HASH" == "$FINAL_HASH" ]] && exit 0
 
-if [ "$NEW_HASH" = "$INITIAL_HASH" ]; then
-  exit 0
-else
-  read -p "$bold$CONFIG_FILE$normal was changed - test config? (y/n) " -n 1 REBUILD
-  [[ $REBUILD == "y" ]] && doas nixos-rebuild test --flake /etc/nixos#dolores || printf " Exit.\n"
-fi
+
+git add .
+git commit -m "$FINAL_HASH"
+read -p "Do you want to build your changes?" REBUILD
+[[ "$REBUILD" ]] && nh os switch --ask
