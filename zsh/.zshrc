@@ -86,6 +86,7 @@ alias music="ncmpcpp -c ~/.config/ncmpcpp/turntable -b ~/.config/ncmpcpp/binding
 alias :q="exit"
 alias c='clear && __prompt_to_bottom_line'
 alias cat='bat'
+alias kali='qemu-system-x86_64 -enable-kvm -m 12G -smp 2 -hda ~/Images/kali.qcow2 -boot d -netdev user,id=net0,net=192.168.0.0/24,dhcpstart=192.168.0.9 -device virtio-net-pci,netdev=net0 -vga std & disown'
 alias clear='clear && __prompt_to_bottom_line'
 alias config="$(which updater)"
 alias e="exit"
@@ -94,6 +95,7 @@ alias so="source"
 alias mkdir="mkdir -pv"
 alias cd="cdls"
 alias allowunfree="export NIXPKGS_ALLOW_UNFREE=1"
+alias wifi="/home/mr/.local/bin/wifzf"
 
 alias chat="ollama run mistral"
 
@@ -184,3 +186,14 @@ export NVM_DIR="$HOME/.config/nvm"
 #[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 
+alias dsbul="docker compose down --volume && docker compose build --no-cache && docker compose up -d && docker compose logs -f"
+alias dsbul="docker compose down --volumes && docker compose build --no-cache && docker compose up -d && docker compose logs -f"
+
+# pnpm
+export PNPM_HOME="/home/mr/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+alias mpv='mpv --no-audio-display'
