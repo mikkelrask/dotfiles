@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+# tshare - Terminal output sharing utility with syntax highlighting
+# Usage: tshare command [args...]
+
+set -e
+
+# Configuration - Change the server URL to your own deployment
+SERVER_URL="https://tshare.porgy-ruler.ts.net"
+DEFAULT_SYNTAX="bash" # Default syntax highlighting
+CLIPBOARD_CMD="wl-copy" # Use pbcopy on macOS
+
+# Check for macOS
+if [[ "$(uname)" == "Darwin" ]]; then
+  CLIPBOARD_CMD="pbcopy"
+fi
+
+# Function to show help
+show_help() {
+  echo "tshare - Terminal output sharing utility"
+  echo "Usage: tshare [options] command [args...]"
+  echo
+  echo "Options:"
+  echo "  -h, --help            Show this help message"
+  echo "  -s, --syntax SYNTAX   Specify syntax highlighting (default: bash)"
+  echo "  -n, --no-clipboard    Don't copy URL to clipboard"
+  echo "  -q, --quiet           Suppress command output (only show URL)"
+  echo "  -u, --url URL         Specify server URL (default: $SERVER_URL)"
+  echo
+  echo "Examples:"
+  echo "  tshare ls -la                # Share output of ls -la"
+  echo "  tshare -s python script.py   # Share with Python syntax highlighting"
+  echo "  tshare -q ls -la             # Share output silently (only show URL)"
+  exit 0
+}
+
+# Parse options
+USE_CLIPBOARD=true
+QUIET=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      show_help
+      ;;
+    -s|--syntax)
+      DEFAULT_SYNTAX="$2"
+      shift 2
+      ;;
+    -u|--url)
+      SERVER_URL="$2"
+      shift 2
+      ;;
+    -n|--no-clipboard)
+      USE_CLIPBOARD=false
+      shift
+      ;;
+    -q|--quiet)
+      QUIET=true
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+# Check if we have a command to execute
+if [[ $# -eq 0 ]]; then
+  echo "Error: No command specified"
+  show_help
+fi
+
+# Temporary file for command output
+OUTPUT_FILE=$(mktemp)
+# Also capture the exit code for proper handling
+EXIT_CODE_FILE=$(mktemp)
+# Set up cleanup trap for both normal exit and interruptions
+trap 'handle_exit' EXIT INT TERM
+
+# Function to handle clean exit and ensure upload happens
+handle_exit() {
+  local exit_code=$?
+  if [[ -f "$EXIT_CODE_FILE" ]]; then
+    exit_code=$(cat "$EXIT_CODE_FILE")
+  fi
+  
+  # Always proceed with upload - especially important for failed commands (for troubleshooting)
+  upload_and_show_url
+  
+  # Clean up temp files
+  rm -f "$OUTPUT_FILE" "$EXIT_CODE_FILE"
+  
+  # Exit with original exit code
+  exit $exit_code
+}
+
+# Function to upload content and display URL
+upload_and_show_url() {
+  # Read content
+  CONTENT=$(cat "$OUTPUT_FILE")
+  
+  # Function to escape JSON strings
+  escape_json() {
+    local content="$1"
+    content="${content//\\/\\\\}"         # Escape backslashes
+    content="${content//\"/\\\"}"         # Escape double quotes
+    content="${content//$'\n'/\\n}"       # Escape newlines
+    content="${content//$'\t'/\\t}"       # Escape tabs
+    content="${content//$'\r'/\\r}"       # Escape carriage returns
+    echo "$content"
+  }
+  
+  # Upload to the server
+  if [[ "$QUIET" != "true" ]]; then
+    echo "Uploading output..."
+  fi
+  
+  if command -v curl &> /dev/null; then
+    ESCAPED_CONTENT=$(escape_json "$CONTENT")
+    ESCAPED_COMMAND=$(escape_json "$COMMAND_STR")
+    ESCAPED_DIR=$(escape_json "$WORKING_DIR")
+  
+    RESPONSE=$(curl -s -X POST "$SERVER_URL/api/paste" \
+         -H "Content-Type: application/json" \
+         -d "{
+           \"content\": \"$ESCAPED_CONTENT\",
+           \"command\": \"$ESCAPED_COMMAND\",
+           \"hostname\": \"$HOSTNAME\",
+           \"workingDir\": \"$ESCAPED_DIR\",
+           \"syntax\": \"$DEFAULT_SYNTAX\"
+         }")
+  
+    # Extract URL from response
+    URL=$(echo "$RESPONSE" | grep -o '"url":"[^"]*"' | sed 's/"url":"\(.*\)"/\1/')
+  
+    if [[ -z "$URL" ]]; then
+      echo "Error: Failed to get URL from server response"
+      echo "Server response: $RESPONSE"
+      return 1
+    fi
+  else
+    echo "Error: curl is required for this script"
+    return 1
+  fi
+  
+  # Output the URL with better visibility
+  echo ""  # Blank line before URL
+  if [[ -t 1 ]]; then  # Check if stdout is a terminal
+    echo -e "\e[1mShare URL: $URL\e[0m"  # Bold if terminal supports it
+  else
+    echo "Share URL: $URL"
+  fi
+  
+  # Copy to clipboard if available
+  if [[ "$USE_CLIPBOARD" == "true" ]]; then
+    if eval "$CLIPBOARD_CMD" <<< "$URL" 2>/dev/null; then
+      if [[ "$QUIET" != "true" ]]; then
+        echo "URL copied to clipboard"
+      fi
+    else
+      if [[ "$QUIET" != "true" ]]; then
+        echo "Clipboard command failed or not available"
+      fi
+    fi
+  fi
+}
+
+# Capture command for display
+COMMAND_STR="$*"
+
+# Get system info
+HOSTNAME=$(hostname)
+WORKING_DIR=$(pwd)
+
+# Run the command and capture output
+if [[ "$QUIET" == "true" ]]; then
+  "$@" > "$OUTPUT_FILE" 2>&1
+  echo $? > "$EXIT_CODE_FILE"
+else
+  echo "Running: $COMMAND_STR"
+  "$@" | tee "$OUTPUT_FILE"
+  echo ${PIPESTATUS[0]} > "$EXIT_CODE_FILE"
+fi
+
+# Rest of the script will be handled by the exit trap
+

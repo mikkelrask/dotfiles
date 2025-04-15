@@ -15,5 +15,5 @@ FINAL_HASH="$(tar -cf - . | md5sum | awk '{print $1}')"
 
 git add .
 git commit -m "$FINAL_HASH"
-read -p "Do you want to build your changes?" REBUILD
-[[ "$REBUILD" ]] && nh os switch --ask
+read -p "Do you want to build your changes? " REBUILD
+[[ "$REBUILD" == "y" ]] && nh os switch --ask

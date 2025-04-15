@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 return_dir=$(pwd)
-music_dir="/pool/Music"
+
+music_dir="/home/mr/Music"
 
 yt_dlp_urls=(
   "*bandcamp.com*"
@@ -9,15 +10,45 @@ yt_dlp_urls=(
   "*soundcloud.com*"
 )
 
-
 remove_id_inside_brackets() {
   local title="$1"
   echo "${title//\[[0-9]*\]/}"
 }
+
+sanitize_title() {
+  local title="$1"
+  # Remove artist name if it appears as "Artist - Title"
+  echo "$title" | sed -E "s/^${artist} - //i"
+}
+
 dl() {
-  local url="$1"
+  local artist=""
+  local album=""
+  local year=""
+  local cover_url=""
+  local url=""
+  local force_overwrite=false
   local use_yt_dlp=false
 
+  # Parse options
+  while getopts "a:A:Y:c:u:f" opt; do
+    case $opt in
+      a) artist="$OPTARG" ;;
+      A) album="$OPTARG" ;;
+      Y) year="$OPTARG" ;;
+      c) cover_url="$OPTARG" ;;
+      u) url="$OPTARG" ;;
+      f) force_overwrite=true ;;
+      *) echo "Invalid option"; exit 1 ;;
+    esac
+  done
+
+  # If URL not provided with -u, try to use first positional parameter
+  if [ -z "$url" ]; then
+    url="${@:$OPTIND:1}"
+  fi
+
+  # Check if URL matches yt-dlp patterns
   for pattern in "${yt_dlp_urls[@]}"; do
     if [[ "$url" == *$pattern* ]]; then
       use_yt_dlp=true
@@ -28,41 +59,97 @@ dl() {
   if $use_yt_dlp; then
     start_dir=$(pwd)
     echo "Media detected - using yt-dlp"
-    read -p "Artist: " artist
-    read -p "Album: " album
-    if [ -d "$music_dir/${artist}/${album}" ]; then
-      echo "Album directory already exists."
-      read -p "Do you want to overwrite it? (y/n): " overwrite
-      [ "$overwrite" != "y" ] && cd "$start_dir" && exit 0
-      cd "$music_dir/${artist}/${album}"
-    elif [[ -d "$music_dir/${artist}" ]]; then
-      mkdir -pv "$music_dir/${artist}/${album}"
-      cd "$music_dir/${artist}/${album}"
-    fi
-    read -p "Year: " year
-    read -p "URL to album art work (leave empty to skip): " cover_url
-    [ "$cover_url" ] && wget -cq --progress bar -O "$music_dir/${artist}/${album}/cover.jpg" "$cover_url"
 
-    yt-dlp -x "$@" -o "$music_dir/${artist}/${album}/%(title)s.%(ext)s"
+    # Prompt for missing inputs if not provided as arguments
+    [ -z "$artist" ] && read -p "Artist: " artist
+    [ -z "$album" ] && read -p "Album: " album
+
+    album_dir="$music_dir/${artist}/${album}"
+    # Ensure album directory exists before using it
+    if [ -d "$album_dir" ]; then
+      if [ "$force_overwrite" = true ]; then
+        echo "Force overwrite enabled. Removing existing directory: $album_dir"
+        rm -rf "$album_dir"
+        mkdir -pv "$album_dir"
+      else
+        echo "Album directory already exists."
+        read -p "Do you want to continue anyway? (could result in overwriting existing files! - y/n): " overwrite
+        [ "$overwrite" != "y" ] && cd "$start_dir" && exit 0
+        #rm -rf "$album_dir"
+        #mkdir -pv "$album_dir"
+        echo "You're the boss 🫡"
+      fi
+    else
+      mkdir -pv "$album_dir"
+    fi
+    cd "$album_dir"
+
+    [ -z "$year" ] && read -p "Year: " year
+    [ -z "$cover_url" ] && read -p "URL to album artwork (leave empty to skip): " cover_url
+
+    # Ensure cover image is downloaded properly
+    if [ -n "$cover_url" ]; then
+      echo "Downloading cover image..."
+      wget -cq --progress=bar -O "cover.jpg" "$cover_url" || {
+        echo "Error: Failed to download cover image!"
+        exit 1
+      }
+    fi
+
+    # Download as FLAC (or convert if not available)
+    yt-dlp -x --audio-format flac "$url" -o "%(title)s.%(ext)s"
     if [ "$?" != 0 ]; then
       echo "Error: yt-dlp failed to download the file(s)."
       cd "$start_dir" && exit 1
     fi
 
-    # Find all supported files and tag them with eyeD3
-    cd "$music_dir/${artist}/${album}"
-    find -maxdepth 1 \( -iname "*.mp3" -o -iname "*.wav" -o -iname "*.opus" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.ogg" -o -iname "*.webm" \) -exec eyeD3 --add-image="$music_dir/${artist}/${album}/cover.jpg":FRONT_COVER -a "$artist" -b "$artist" -A "$album" -Y "$year" {} + &>/dev/null
+    # Get the list of FLAC files sorted by creation time (oldest first)
+    #mapfile -t tracks < <(ls -1U *.flac)
+    # Get the list of FLAC files sorted by modification time (oldest first)
+    mapfile -t tracks < <(ls -tr *.flac)
 
-    if [ "$?" != 0 ]; then
-      echo "Error: eyeD3 failed to tag file(s)."
-      cd "$start_dir" && exit 1
-    fi
+    total_tracks=${#tracks[@]}  # Get total number of tracks
 
-    cd "$start_dir" && exit 0
+    track_number=1
+    for file in "${tracks[@]}"; do
+      [ -e "$file" ] || continue  # Skip if no files are found
+
+      # Remove file extension and sanitize the title
+      title=$(sanitize_title "${file%.*}")
+
+      # Ensure track number formatting (zero-padded)
+      track_number_formatted=$(printf "%02d" "$track_number")
+
+      # Rename file to "01 Track Title.flac"
+      new_filename="${track_number_formatted} ${title}.flac"
+
+      mv -n "$file" "$new_filename"
+
+      # Apply metadata with metaflac
+      metaflac --remove-all-tags "$new_filename"
+      metaflac --set-tag="ARTIST=$artist" \
+              --set-tag="ALBUM=$album" \
+              --set-tag="DATE=$year" \
+              --set-tag="TRACKNUMBER=$track_number" \
+              --set-tag="TOTALTRACKS=$total_tracks" \
+              --set-tag="TITLE=$title" "$new_filename"
+
+      # Add cover image
+      metaflac --import-picture-from="cover.jpg" "$new_filename"
+
+      ((track_number++))
+    done
+
+    cd "$start_dir"
+    exit 0
   else
-    wget -cq --progress bar "$@"
+    wget -cq --progress=bar "$url"
   fi
 }
 
 # Call the function with command line arguments
-dl "$@"
+if  ifinstalled "ffmpeg" "metaflac" "wget"; then
+  dl "$@";
+else 
+  echo "Do your thing";
+fi

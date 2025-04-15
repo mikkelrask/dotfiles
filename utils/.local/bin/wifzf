@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+if ! command -v fzf >/dev/null 2>&1; then
+  echo "fzf is required."
+  exit 1
+fi
+
+# Show WiFi info and select one network (only SSID)
+WIFI="$(nmcli -f SSID device wifi | fzf | xargs)"
+if [[ -z "$WIFI" ]]; then
+  exit 0
+fi
+
+# Clear screen and display selected SSID
+clear
+echo "Enter your user password to connect to '$WIFI'"
+
+# Attempt to connect to the selected SSID
+doas nmcli device wifi connect "$WIFI" >/dev/null 2>&1
+
+if [[ "$?" != 0 ]]; then 
+  echo "Something went wrong."
+  exit 1
+fi
+
+echo "Connected to '$WIFI' successfully"
