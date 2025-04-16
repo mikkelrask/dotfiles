@@ -4,10 +4,9 @@
 
 set -e
 
-# Configuration - Change the server URL to your own deployment
 SERVER_URL="https://tshare.porgy-ruler.ts.net"
-DEFAULT_SYNTAX="bash" # Default syntax highlighting
-CLIPBOARD_CMD="wl-copy" # Use pbcopy on macOS
+DEFAULT_SYNTAX="bash" 
+CLIPBOARD_CMD="wl-copy" # Use xclip if you are x11
 
 # Check for macOS
 if [[ "$(uname)" == "Darwin" ]]; then
@@ -21,7 +20,7 @@ show_help() {
   echo
   echo "Options:"
   echo "  -h, --help            Show this help message"
-  echo "  -s, --syntax SYNTAX   Specify syntax highlighting (default: bash)"
+  echo "  -s, --syntax SYNTAX   Specify syntax highlighting (default: auto-detected)"
   echo "  -n, --no-clipboard    Don't copy URL to clipboard"
   echo "  -q, --quiet           Suppress command output (only show URL)"
   echo "  -u, --url URL         Specify server URL (default: $SERVER_URL)"
@@ -33,9 +32,123 @@ show_help() {
   exit 0
 }
 
+# Detect syntax based on command
+detect_syntax() {
+  local cmd="$1"
+  local args=($cmd)  # Split the command into an array
+  local base_cmd=$(basename "${args[0]}")
+  
+  # For commands that didn't match above, look for file extensions
+  # Find the first argument that looks like a file
+  local file=""
+  for arg in "${args[@]:1}"; do
+    # Skip arguments that start with - (flags)
+    if [[ "$arg" == -* ]]; then
+      continue
+    fi
+    # Found a non-flag argument that might be a file
+    file="$arg"
+    break
+  done
+  
+  local file_ext=""
+  # Extract file extension if present
+  if [[ "$file" == *"."* ]]; then
+    file_ext="${file##*.}"
+  fi
+  
+  # Check for direct command matches first
+  if [[ "$base_cmd" == "python" || "$base_cmd" == "python2" || "$base_cmd" == "python3" || 
+        "$base_cmd" == "ipython" || "$base_cmd" == "pytest" || "$base_cmd" == "uv" ]]; then
+    echo "python"
+    return 0
+  elif [[ "$base_cmd" == "node" || "$base_cmd" == "npm" || "$base_cmd" == "npx" || 
+           "$base_cmd" == "yarn" || "$base_cmd" == "pnpm" || "$base_cmd" == "bun" ]]; then
+    echo "javascript"
+    return 0
+  elif [[ "$base_cmd" == "ruby" || "$base_cmd" == "irb" || "$base_cmd" == "rails" || 
+           "$base_cmd" == "rake" || "$base_cmd" == "bundle" || "$base_cmd" == "gem" ]]; then
+    echo "ruby"
+    return 0
+  elif [[ "$base_cmd" == "go" || "$base_cmd" == "gofmt" ]]; then
+    echo "go"
+    return 0
+  elif [[ "$base_cmd" == "php" || "$base_cmd" == "composer" ]]; then
+    echo "php"
+    return 0
+  elif [[ "$base_cmd" == "java" || "$base_cmd" == "javac" || "$base_cmd" == "gradle" || 
+           "$base_cmd" == "mvn" ]]; then
+    echo "java"
+    return 0
+  elif [[ "$base_cmd" == "docker" || "$base_cmd" == "docker-compose" || "$base_cmd" == "podman" ]]; then
+    echo "dockerfile"
+    return 0
+  elif [[ "$base_cmd" == "terraform" || "$base_cmd" == "tf" ]]; then
+    echo "hcl"
+    return 0
+  elif [[ "$base_cmd" == "kubectl" || "$base_cmd" == "helm" || "$base_cmd" == "k9s" ]]; then
+    echo "yaml"
+    return 0
+  elif [[ "$base_cmd" == "ansible" || "$base_cmd" == "ansible-playbook" ]]; then
+    echo "yaml"
+    return 0
+  elif [[ "$base_cmd" == "make" ]]; then
+    echo "makefile"
+    return 0
+  fi
+  
+  # Special handling for common scripts with file extensions
+  if [[ "$file_ext" == "py" ]]; then
+    echo "python"
+  elif [[ "$file_ext" == "js" || "$file_ext" == "jsx" || "$file_ext" == "ts" || "$file_ext" == "tsx" ]]; then
+    echo "javascript"
+  elif [[ "$file_ext" == "rb" ]]; then
+    echo "ruby"
+  elif [[ "$file_ext" == "go" ]]; then
+    echo "go"
+  elif [[ "$file_ext" == "php" ]]; then
+    echo "php"
+  elif [[ "$file_ext" == "java" || "$file_ext" == "kt" || "$file_ext" == "scala" ]]; then
+    echo "java"
+  elif [[ "$file_ext" == "rs" ]]; then
+    echo "rust"
+  elif [[ "$file_ext" == "cs" ]]; then
+    echo "csharp"
+  elif [[ "$file_ext" == "cpp" || "$file_ext" == "cc" || "$file_ext" == "c" || 
+          "$file_ext" == "h" || "$file_ext" == "hpp" ]]; then
+    echo "cpp"
+  elif [[ "$file_ext" == "md" || "$file_ext" == "markdown" ]]; then
+    echo "markdown"
+  elif [[ "$file_ext" == "html" || "$file_ext" == "htm" ]]; then
+    echo "html"
+  elif [[ "$file_ext" == "css" || "$file_ext" == "scss" || "$file_ext" == "sass" ]]; then
+    echo "css"
+  elif [[ "$file_ext" == "xml" ]]; then
+    echo "xml"
+  elif [[ "$file_ext" == "json" ]]; then
+    echo "json"
+  elif [[ "$file_ext" == "yaml" || "$file_ext" == "yml" ]]; then
+    echo "yaml"
+  elif [[ "$file_ext" == "sql" ]]; then
+    echo "sql"
+  elif [[ "$file_ext" == "sh" || "$file_ext" == "bash" ]]; then
+    echo "bash"
+  elif [[ "$file_ext" == "ps1" ]]; then
+    echo "powershell"
+  else
+    # Handle the case where uv is followed by a command (run, pip, etc.)
+    if [[ "$base_cmd" == "uv" && "${args[1]}" == "run" && "${args[2]}" == *".py" ]]; then
+      echo "python"
+    else
+      echo "bash"  # Default fallback
+    fi
+  fi
+}
+
 # Parse options
 USE_CLIPBOARD=true
 QUIET=false
+SYNTAX_SPECIFIED=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -43,6 +156,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     -s|--syntax)
       DEFAULT_SYNTAX="$2"
+      SYNTAX_SPECIFIED=true
       shift 2
       ;;
     -u|--url)
@@ -67,6 +181,15 @@ done
 if [[ $# -eq 0 ]]; then
   echo "Error: No command specified"
   show_help
+fi
+
+# Capture command for display
+COMMAND_STR="$*"
+
+# Auto-detect syntax if not manually specified
+if [[ "$SYNTAX_SPECIFIED" != "true" ]]; then
+  DEFAULT_SYNTAX=$(detect_syntax "$COMMAND_STR")
+  echo "Auto-detected syntax: $DEFAULT_SYNTAX"
 fi
 
 # Temporary file for command output
@@ -163,9 +286,6 @@ upload_and_show_url() {
     fi
   fi
 }
-
-# Capture command for display
-COMMAND_STR="$*"
 
 # Get system info
 HOSTNAME=$(hostname)

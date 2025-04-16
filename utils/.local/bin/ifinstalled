@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-G
+
 
 DISTRO=$(lsb_release -si)
 #echo "$DISTRO"
@@ -18,7 +18,7 @@ function ubuntu {
 	    if ! which "$x" >/dev/null 2>&1 && ! dpkg -s "$x" >/dev/null 2>&1; then
 	        # If not found, display a notification and exit with status 1
           echo "ub"
-	        hyprctl notify 4 5000 "rgb(ff0000)" "📦 $x" "must be installed for this function." && exit 1;
+	        #hyprctl notify 4 5000 "rgb(ff0000)" "📦 $x" "must be installed for this function." && exit 1;
 	    fi
 	done
 }
