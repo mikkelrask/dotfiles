@@ -1,0 +1,22 @@
+.env
+*.tar.*
+
+# python specific
+.venv
+.pytest_cache
+__pycache__
+.ruff_cache
+
+# Rust
+target/
+
+# JS
+node_modules/
+dist/
+.next/
+out/
+build/
+.vercel
+next-env.d.ts
+
+

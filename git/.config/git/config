@@ -1,0 +1,87 @@
+[user]
+  name = Mikkel Rask
+  email = mikkelrask@protonmail.com
+  signingkey = /home/mr/.ssh/id_rsa.pub  
+
+[core]
+  compression = 9
+  whitespace = error
+  preloadindex = true
+
+[advice]
+  addEmptyPathspec = false
+  pushNonFastForward = false
+  statusHints = false
+  
+[url "git@github.com:mikkelrask/"]
+  insteadOf = "mr:"
+
+[url "git@github.com:"]
+  insteadOf = "gh:"
+
+[init]
+  defaultBranch = dev
+
+[status]
+  branch = true
+  showStatus = true
+  showUntrackedFiles = all
+
+[diff]
+  context = 3
+  renames = copies
+  interHunkContext = 10
+  tabs = 2
+
+[pager]
+  diff = diff-so-fancy | $PAGER
+
+[interactive]
+  diffFilter = diff-so-fancy --patch
+  singlekey = true
+
+[push]
+  autoSetupRemote = true
+  default = current
+  followTags = true
+
+[pull]
+  default = current
+  rebase = false
+
+[rebase]
+  autoStash = true
+  missingCommitChecks = warn
+
+[log]
+  abbrevCommit = true
+  graphColors = blue,yellow,cyan,magenta,green,red
+
+[color "decorate"]
+  HEAD = red
+  branch = blue
+  tag = yellow
+  remoteBranch = magenta
+
+[color "branch"]
+  current = magenta
+  local = default
+  remote = yellow
+  upstream = green
+  plain = blue
+
+[branch]
+  sort = -committerdate
+
+[tag]
+  sort = -taggerdate
+
+[pager]
+  branch = true
+  tag = true
+
+[gpg]
+  format = ssh
+
+[commit]
+  gpgsign = true

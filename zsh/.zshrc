@@ -82,20 +82,19 @@ start_screencast() {
 
 alias music="ncmpcpp -c $HOME/.config/ncmpcpp/config -b $HOME/.config/ncmpcpp/bindings"
 alias :q="exit"
-alias c='clear && __prompt_to_bottom_line'
-alias cat='bat'
 alias clear='clear && __prompt_to_bottom_line'
+alias c='clear'
+alias cat='bat'
 alias config="$EDITOR $HOME/.config/i3/config"
 alias e="exit"
 alias so="source"
-
-alias chat="ollama run qwen2.5-bolt-coder:7b"
-
 alias v="nvim"
+alias chat="ollama run qwen3"
+
 alias mci="make-clean-install"
 
 # Git specifics
-alias gc='git commit -m'
+alias gc='git commit'
 alias add='git add'
 alias ga='git add'
 alias gap='git add --patch'
@@ -127,7 +126,7 @@ alias rabeco="tmex 'rabeco' -t 'ssh rabeco.dk@linux351.unoeuro.com'"
 alias lah="eza -lah --icons --color=auto"
 alias ls="eza --icons --color=auto"
 alias tree="eza --tree --icons"
-alias finder=pcmanfm
+alias finder="pcmanfm ."
 alias MCA="/home/mr/.local/bin/java/zulu/bin/java -jar /home/mr/.local/bin/mcaselector-2.4.jar"
 
 ## Start screencast
