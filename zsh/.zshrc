@@ -1,11 +1,9 @@
-__prompt_to_bottom_line() {                                                                                                                                                  
-tput cup $LINES                                                                                                                                                            
-}                                                                                                                                                                            
 #if [ -d "$HOME/.config/zsh" ]; then 
 #  for file in "$(ls $HOME/.config/zsh/)"; do
 #    [ -f "$file" ] && source "$file"
 #  done
 #fi
+
 #  /$$$$$$$$                              /$$     /$$                              
 # | $$_____/                             | $$    |__/                              
 # | $$    /$$   /$$ /$$$$$$$   /$$$$$$$ /$$$$$$   /$$  /$$$$$$  /$$$$$$$   /$$$$$$$
@@ -17,9 +15,9 @@ tput cup $LINES
 
 # start our prompt at the bottom of the screen
 __prompt_to_bottom_line() {                                                                                                                                                  
-┊ tput cup $LINES                                                                                                                                                            
+tput cup $LINES                                                                                                                                                            
 }                                                                                                                                                                            
-
+__prompt_to_bottom_line                                                                                                                                                      
 __TMEX_LAUNCH () {                                                                                                                                                           
 ┊ cd ~/repos/dotfile-docs                                                                                                                                                    
 ┊ tmex 'WRITEUP' -f=1 -t -l=13{211} v  'bun i' cava cmatrix -w 'bun run serve'                                                                                               
@@ -50,6 +48,10 @@ make-clean-install() {
 # Files to source
 if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
+fi
+
+if [ -d "$HOME/.pnpm/" ]; then
+  PATH="$HOME/.pnpm/bin:$PATH"
 fi
 
 if [ -d "$HOME/.bun" ]; then
@@ -84,13 +86,10 @@ alias c='clear && __prompt_to_bottom_line'
 alias cat='bat'
 alias clear='clear && __prompt_to_bottom_line'
 alias config="$EDITOR $HOME/.config/i3/config"
-alias dl="wget -cq --show-progress"
 alias e="exit"
-alias pip3="pip"
-alias pip="pipx"
 alias so="source"
 
-alias chat="ollama run mistral"
+alias chat="ollama run qwen2.5-bolt-coder:7b"
 
 alias v="nvim"
 alias mci="make-clean-install"
@@ -98,9 +97,17 @@ alias mci="make-clean-install"
 # Git specifics
 alias gc='git commit -m'
 alias add='git add'
+alias ga='git add'
+alias gap='git add --patch'
+alias gd="git diff --output-indicator-new=' ' --output-indicator-old=' '"
+alias gdp="git diff --patch"
+alias gb='git branch'
+alias gl="git log --all --graph --pretty=format:'%C(magenta)%h(white) %an %ar%C(auto) %D%n%s%n'"
+alias gi='git init'
+alias clone="git clone"
 alias push='git push'
 alias pull='git pull'
-alias status='git status'
+alias status='git status --short'
 alias gs='git status'
 
 # Package manager
@@ -117,9 +124,11 @@ alias clean='doas dnf autoremove'
 alias docunator="__TMEX_LAUNCH"
 alias rabeco="tmex 'rabeco' -t 'ssh rabeco.dk@linux351.unoeuro.com'"
 
-alias lah="exa -lah --icons --color=auto"
-alias ls="exa --icons --color=auto"
-alias tree="exa --tree --icons"
+alias lah="eza -lah --icons --color=auto"
+alias ls="eza --icons --color=auto"
+alias tree="eza --tree --icons"
+alias finder=pcmanfm
+alias MCA="/home/mr/.local/bin/java/zulu/bin/java -jar /home/mr/.local/bin/mcaselector-2.4.jar"
 
 ## Start screencast
 
@@ -142,6 +151,7 @@ plug "zsh-users/zsh-syntax-highlighting"
 plug 'zsh-users/zsh-history-substring-search'
 plug 'MichaelAquilina/zsh-you-should-use'
 plug 'zsh-omz-autocomplete'
+plug 'joshskidmore/zsh-fzf-history-search'
 
 # Singularisart prompt
 typeset -A __Prompt
@@ -197,4 +207,22 @@ _readable_yargs_completions()
 }
 compdef _readable_yargs_completions readable
 ###-end-readable-completions-###
+
+alias get-class="xprop | grep CLASS | awk '{print $4}'"
+
+. "$HOME/.cargo/env"
+alias MCA='~/.local/bin/java/zulu/bin/java -jar ~/.local/bin/mcaselector-2.4.jar'
+
+# pnpm
+export PNPM_HOME="/home/mr/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# Set up fzf key bindings and fuzzy completion
+source <(fzf --zsh)
+
+
 

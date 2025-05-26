@@ -1,0 +1,37 @@
+{
+  "layer": "background",
+  "position": "top",
+  "height": 24,
+  "spacing": 5,
+  "modules-left": ["hyprland/workspaces", "hyprland/window"],
+  "modules-center": ["hyprland/mode"],
+  "modules-right": ["pulseaudio", "cpu","updates","tray", "clock"],
+  "hyprland/workspaces": {
+    "show-title": false,
+    "show-border": false,
+    "all-output": false,
+    "show-icon": true,
+    "disable-scroll": true,
+    "show-underline": false,
+    "format": "{icon}",
+    "format-icons": {
+      "1:tty": "",
+      "2:web": "",
+      "3:communication": "",
+      "4:word": "",
+      "5:coding": "",
+      "6:desktop": "",
+      "7:game": "",
+      "8:media": "",
+      "9:config": "",
+      "urgent": "",
+      "focused": "",
+      },
+    "tray": {
+      "spacing": 10
+    },
+    "cpu": {
+      "format": " {usage}%",
+    }
+  },
+}

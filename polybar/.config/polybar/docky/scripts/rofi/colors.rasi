@@ -1,10 +1,22 @@
 /* colors */
 
 * {
-  al:   #00000000;
-  bg:   #1F1F1FFF;
-  bga:  #e5393533;
-  bar:  #FFFFFFFF;
-  fg:   #FFFFFFFF;
-  ac:   #e53935FF;
+  --base: #191724FF;
+  --surface: #1f1d2bFF;
+  --overlay: #26233AFF;
+  --muted: #6e6a86FF;
+  --subtle: #908caaFF;
+  --text: #e0def4FF;
+  --love: #eb6f92FF;
+  --gold: #f6c177FF;
+  --rose: #ebbcbaFF;
+  --pine: #31748fFF;
+  --foam: #9ccfd8FF;
+  --iris: #c4a7e7FF;
+  al:   #191724FF; // "al" 🤫
+  bg:   #191724FF; // general background
+  bga:  #26233AFF; // highligted backgrouns/search result
+  bar:  #908caaFF; // search bar font color
+  fg:   #e0def4FF;
+  ac:   #191724FF;
 }

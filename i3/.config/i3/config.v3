@@ -3,8 +3,8 @@ set $mod Mod1
 # Mod4 == Super
 set $super Mod4
 
-set $browser librewolf
-set $terminal ghostty
+set $browser waterfox
+set $terminal kitty 
 set $filemanager pcmanfc
 set $vertical_mon DP-0.1
 set $main_mon DP-0.8
@@ -32,30 +32,32 @@ set $highlighthigh  #524f67
 font pango:FantasqueSansM Nerd Font Propo 14
 
 # https://wiki.archlinux.org/index.php/XDG_Autostart
-exec --no-startup-id /usr/bin/tailscale up
-exec --no-startup-id python /home/mr/Repos/volume-server/server.py
-exec --no-startup-id /usr/bin/lxpolkit
-#exec --nostartup-id /usr/bin/screenkey
-exec_always --no-startup-id bash /home/mr/.screenlayout/default.sh
-exec --no-startup-id /usr/bin/picom -b
+#exec --no-startup-id /usr/bin/tailscale up
+#exec --no-startup-id python /home/mr/Repos/volume-server/server.py
+#exec --no-startup-id /usr/bin/lxpolkit
+exec --no-startup-id bash /home/mr/.screenlayout/extra-left-vertical.sh
+#exec --no-startup-id bash /home/mr/.screenlayout/single.sh
+#exec --no-startup-id /usr/bin/picom -b
 exec --no-startup-id dex --autostart --environment i3
-exec --no-startup-id dunst -config ~/.config/dunst/dunstrc
-exec --no-startup-id unclutter -root
-exec_always --no-startup-id libinput-gestures
-exec --no-startup-id /usr/bin/blueman-applet &
-exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
-exec --no-startup-id nm-applet
-exec_always --no-startup-id feh --bg-fill "$WALLPAPER"
-exec --no-startup-id /home/mr/.config/polybar/launch.sh --docky
+#exec --no-startup-id dunst -config ~/.config/dunst/dunstrc
+#exec --no-startup-id unclutter -root
+exec --nostartup-id /usr/bin/screenkey
+
+#exec --no-startup-id /usr/bin/blueman-applet &
+#exec --no-startup-id xss-lock --transfer-sleep-lock -- i3lock --nofork
+#exec --no-startup-id nm-applet
+#exec_always --no-startup-id feh --bg-fill "$WALLPAPER"
+#exec_always --no-startup-id /usr/bin/setxkbmap -layout dk
+#exec --no-startup-id /home/mr/.local/bin/mpd
+#exec --no-startup-id /home/mr/.config/polybar/launch.sh --docky
 #exec --no-startup-id /usr/bin/steam -silent %U 
-exec_always --no-startup-id bash -c "sleep 2 && /usr/bin/setxkbmap dk"
-exec --no-startup-id sunshine
 
 set $refresh_i3status killall -SIGUSR1 i3status
 bindsym XF86AudioRaiseVolume exec --no-startup-id volume up
 bindsym XF86AudioLowerVolume exec --no-startup-id volume down
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
 bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
+bindsym $mod+Shift+Return exec --no-startup-id layoutchanger.sh
 bindsym $mod+Return exec $terminal
 bindsym $mod+w exec --no-startup-id $BROWSER 
 bindsym $mod+t exec --no-startup-id pcmanfm 
@@ -66,10 +68,10 @@ bindsym $mod+Shift+d exec --no-startup-id $HOME/.config/polybar/docky/scripts/la
 bindsym $mod+space exec --no-startup-id dmenu_run -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724'
 bindsym $mod+ctrl+space exec --no-startup-id dmenu run -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724'
 bindsym $mod+e exec --no-startup-id $HOME/.local/bin/dmenuunicode
-bindsym $mod+ctrl+x exec --no-startup-id $HOME/.local/bin/dmenu_power 
+bindsym Ctrl+x exec --no-startup-id $HOME/.local/bin/dmenu_power 
 bindsym $mod+ctrl+w exec --no-startup-id $HOME/.local/bin/wallsetter
-bindsym ctrl+Escape exec --no-startup-id $terminal -e btop
-#bindsym ctrl+shift+p exec --no-startup-id shotgun -g "$(hacksaw -f)"
+bindsym ctrl+Escape exec --no-startup-id kitty 
+bindsym ctrl+shift+p exec --no-startup-id shotgun -g "$(hacksaw -f)"
 
 
 
@@ -194,19 +196,12 @@ assign [class="figma-linux"] $ws6
 assign [class="Code"] $ws5
 assign [class="Spotify"] $ws6
 assign [class="steam"] $ws7
-assign [class="socialclubhelper.exe"] $ws7 
-assign [class="launcher.exe"] $ws7 
 assign [class="dev.zed.Zed-Dev"] $ws5
 assign [class="krita"] $ws6
 
 for_window [urgent="latest"] focus
-for_window [class="steam"] focus floating enable
-for_window [class="socialclubhelper.exe"] floating enable
-for_window [class="rdr2.exe"] focus fullscreen enable
-for_window [class="mrdoom"] floating enable
-for_window [class="launcher.exe"] floating enable
 # reload the configuration file
-bindsym ctrl+Shift+c reload
+bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
@@ -260,4 +255,3 @@ client.urgent            $text     $base $text  $love      $love
 client.placeholder       $base     $base $text  $overlay   $overlay
 client.background        $base
 
-exec_always --no-startup-id /usr/bin/setxkbmap -option ""

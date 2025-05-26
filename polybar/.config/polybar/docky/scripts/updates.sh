@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NOTIFY_ICON=/usr/share/icons/Papirus/32x32/apps/system-software-update.svg
+NOTIFY_ICON=/usr/share/icons/breeze-dark/status/24/update-none.svg
 
 get_total_updates() { UPDATES=$(~/.config/polybar/docky/scripts/checkupdates 2>/dev/null | wc -l); }
 
