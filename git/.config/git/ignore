@@ -1,16 +1,20 @@
 .env
 *.tar.*
+ENV
+bin/
 
 # python specific
 .venv
 .pytest_cache
 __pycache__
 .ruff_cache
+lib/
+lib64/
 
 # Rust
 target/
 
-# JS
+# JS/TS
 node_modules/
 dist/
 .next/
@@ -18,5 +22,6 @@ out/
 build/
 .vercel
 next-env.d.ts
+tsconfig.*
 
 
