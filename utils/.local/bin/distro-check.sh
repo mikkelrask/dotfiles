@@ -3,6 +3,7 @@
 set -eou pipefail
 
 # check what specific linux distro we are on
+# ifinstalled lsb-release
 
 distro=$(lsb_release -si)
 
@@ -15,13 +16,16 @@ if [ $distro = "Ubuntu" ]; then
     "alias upgrade='apt update && doas apt upgrade -y'",\
     "alias clean='doas apt autoremove'"\
   } >> ~/.zshrc
-elif [ $distro = "Fedora" ]; then
+elif [ "$distro" = "Fedora" ]; then
   echo "You are using Fedora"
-elif [ $distro = "CentOS" ]; then
+elif [ "$distro" = "CentOS" ]; then
   echo "You are using CentOS"
-elif [ $distro = "Arch" ]; then
-  echo "You are using Arch Linux"
+elif [ "$distro" = "Arch" ]; then
+  echo "You are using Arch Linux, btw"
+elif [ "$distro" == '"NixOS"' ]; then
+  echo "You are using NixOS - you sadist!"
 else
-  echo "You are using an unknown distro"
+  echo "Dunno man"
+  echo "$distro"
 fi
 

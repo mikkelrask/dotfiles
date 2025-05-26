@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 noteFilename="$HOME/Documents/notes/note-$(date +%d-%m-%Y).md"
 

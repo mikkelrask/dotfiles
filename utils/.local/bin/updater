@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+CONFIG_DIR="$HOME/.nixos"
+cd $CONFIG_DIR
+INITIAL_HASH="$(tar -cf - . | md5sum | awk '{print $1}')"
+
+$EDITOR .
+FINAL_HASH="$(tar -cf - . | md5sum | awk '{print $1}')"
+
+[[ "$INITIAL_HASH" == "$FINAL_HASH" ]] && exit 0
+
+
+git add .
+git commit -m "$FINAL_HASH"
+read -p "Do you want to build your changes? " REBUILD
+[[ "$REBUILD" == "y" ]] && nh os switch --ask

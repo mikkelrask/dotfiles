@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+
+return_dir=$(pwd)
+
+music_dir="/home/mr/Music"
+
+yt_dlp_urls=(
+  "*bandcamp.com*"
+  "*youtube.com*"
+  "*soundcloud.com*"
+)
+
+remove_id_inside_brackets() {
+  local title="$1"
+  echo "${title//\[[0-9]*\]/}"
+}
+
+sanitize_title() {
+  local title="$1"
+  # Remove artist name if it appears as "Artist - Title"
+  echo "$title" | sed -E "s/^${artist} - //i"
+}
+
+dl() {
+  local artist=""
+  local album=""
+  local year=""
+  local cover_url=""
+  local url=""
+  local force_overwrite=false
+  local use_yt_dlp=false
+
+  # Parse options
+  while getopts "a:A:Y:c:u:f" opt; do
+    case $opt in
+      a) artist="$OPTARG" ;;
+      A) album="$OPTARG" ;;
+      Y) year="$OPTARG" ;;
+      c) cover_url="$OPTARG" ;;
+      u) url="$OPTARG" ;;
+      f) force_overwrite=true ;;
+      *) echo "Invalid option"; exit 1 ;;
+    esac
+  done
+
+  # If URL not provided with -u, try to use first positional parameter
+  if [ -z "$url" ]; then
+    url="${@:$OPTIND:1}"
+  fi
+
+  # Check if URL matches yt-dlp patterns
+  for pattern in "${yt_dlp_urls[@]}"; do
+    if [[ "$url" == *$pattern* ]]; then
+      use_yt_dlp=true
+      break
+    fi
+  done
+
+  if $use_yt_dlp; then
+    start_dir=$(pwd)
+    echo "Media detected - using yt-dlp"
+
+    # Prompt for missing inputs if not provided as arguments
+    [ -z "$artist" ] && read -p "Artist: " artist
+    [ -z "$album" ] && read -p "Album: " album
+
+    album_dir="$music_dir/${artist}/${album}"
+    # Ensure album directory exists before using it
+    if [ -d "$album_dir" ]; then
+      if [ "$force_overwrite" = true ]; then
+        echo "Force overwrite enabled. Removing existing directory: $album_dir"
+        rm -rf "$album_dir"
+        mkdir -pv "$album_dir"
+      else
+        echo "Album directory already exists."
+        read -p "Do you want to continue anyway? (could result in overwriting existing files! - y/n): " overwrite
+        [ "$overwrite" != "y" ] && cd "$start_dir" && exit 0
+        #rm -rf "$album_dir"
+        #mkdir -pv "$album_dir"
+        echo "You're the boss 🫡"
+      fi
+    else
+      mkdir -pv "$album_dir"
+    fi
+    cd "$album_dir"
+
+    [ -z "$year" ] && read -p "Year: " year
+    [ -z "$cover_url" ] && read -p "URL to album artwork (leave empty to skip): " cover_url
+
+    # Ensure cover image is downloaded properly
+    if [ -n "$cover_url" ]; then
+      echo "Downloading cover image..."
+      wget -cq --progress=bar -O "cover.jpg" "$cover_url" || {
+        echo "Error: Failed to download cover image!"
+        exit 1
+      }
+    fi
+
+    # Download as FLAC (or convert if not available)
+    yt-dlp -x --audio-format flac "$url" -o "%(title)s.%(ext)s"
+    if [ "$?" != 0 ]; then
+      echo "Error: yt-dlp failed to download the file(s)."
+      cd "$start_dir" && exit 1
+    fi
+
+    # Get the list of FLAC files sorted by creation time (oldest first)
+    #mapfile -t tracks < <(ls -1U *.flac)
+    # Get the list of FLAC files sorted by modification time (oldest first)
+    mapfile -t tracks < <(ls -tr *.flac)
+
+    total_tracks=${#tracks[@]}  # Get total number of tracks
+
+    track_number=1
+    for file in "${tracks[@]}"; do
+      [ -e "$file" ] || continue  # Skip if no files are found
+
+      # Remove file extension and sanitize the title
+      title=$(sanitize_title "${file%.*}")
+
+      # Ensure track number formatting (zero-padded)
+      track_number_formatted=$(printf "%02d" "$track_number")
+
+      # Rename file to "01 Track Title.flac"
+      new_filename="${track_number_formatted} ${title}.flac"
+
+      mv -n "$file" "$new_filename"
+
+      # Apply metadata with metaflac
+      metaflac --remove-all-tags "$new_filename"
+      metaflac --set-tag="ARTIST=$artist" \
+              --set-tag="ALBUM=$album" \
+              --set-tag="DATE=$year" \
+              --set-tag="TRACKNUMBER=$track_number" \
+              --set-tag="TOTALTRACKS=$total_tracks" \
+              --set-tag="TITLE=$title" "$new_filename"
+
+      # Add cover image
+      metaflac --import-picture-from="cover.jpg" "$new_filename"
+
+      ((track_number++))
+    done
+
+    cd "$start_dir"
+    exit 0
+  else
+    wget -cq --progress=bar "$url"
+  fi
+}
+
+# Call the function with command line arguments
+if  ifinstalled "ffmpeg" "metaflac" "wget"; then
+  dl "$@";
+else 
+  echo "Do your thing";
+fi

@@ -1,0 +1,101 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+  echo "Usage: ae <command> [arguments]"
+  echo "Automatically re-executes the command when files change."
+  exit 1
+fi
+
+# Store the command and its arguments
+cmd="$@"
+
+# Function to save current file status
+save_file_status() {
+  find "$(pwd)" -type f -not -path "*/\.*" -not -path "*/node_modules/*" -print0 2>/dev/null | \
+    xargs -0 stat -c "%n %Y" 2>/dev/null || \
+    find "$(pwd)" -type f -not -path "*/\.*" -not -path "*/node_modules/*" -print0 2>/dev/null | \
+    xargs -0 stat -f "%N %m" 2>/dev/null
+}
+
+# Function to kill process with a multi-stage graceful approach
+kill_process() {
+  if [ -n "$pid" ]; then
+    echo "[ae] Attempting graceful shutdown of process (PID: $pid)"
+    # Target the entire process group
+    echo "[ae] Sending SIGINT to process group -$pid"
+    kill -INT -"$pid" 2>/dev/null || kill -INT "$pid" 2>/dev/null
+    timeout=0
+    while ps -p "$pid" > /dev/null 2>&1 && [ $timeout -lt 5 ]; do
+      echo "[ae] Waiting for process to exit gracefully (SIGINT)..."
+      sleep 0.5
+      timeout=$((timeout+1))
+    done
+
+    if ps -p "$pid" > /dev/null 2>&1; then
+      echo "[ae] Process did not exit after SIGINT. Sending SIGTERM to group -$pid..."
+      kill -TERM -"$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null
+      timeout=0
+      while ps -p "$pid" > /dev/null 2>&1 && [ $timeout -lt 5 ]; do
+        echo "[ae] Waiting for process to terminate (SIGTERM)..."
+        sleep 0.5
+        timeout=$((timeout+1))
+      done
+    fi
+
+    if ps -p "$pid" > /dev/null 2>&1; then
+      echo "[ae] Process did not exit after SIGTERM. Sending SIGKILL to group -$pid..."
+      kill -KILL -"$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null
+      while ps -p "$pid" > /dev/null 2>&1; do
+        echo "[ae] Waiting for process to be forcibly killed..."
+        sleep 0.5
+      done
+    fi
+
+    echo "[ae] Process terminated"
+  fi
+}
+
+# Set up trap to kill the process on script exit
+trap "kill_process; exit" INT TERM EXIT
+
+# Initial run
+echo "[ae] Starting: $cmd"
+echo "[ae] Monitoring current directory: $(pwd)"
+
+# Start the command in a new process group using setsid
+#setsid bash -c "$cmd" > >(tee /dev/tty) 2>&1 &
+setsid bash -c "$cmd" &
+pid=$!
+echo "[ae] Process started with PID: $pid"
+
+# Optionally, display the process group of the new process
+pgrp=$(ps -o pgid= -p "$pid" | tr -d ' ')
+echo "[ae] Process group: $pgrp"
+
+# Get initial file status
+last_status=$(save_file_status)
+echo "[ae] Watching for file changes (press Ctrl+C to stop)..."
+
+# Main loop to monitor file changes
+while true; do
+  sleep 1
+  current_status=$(save_file_status)
+  
+  if [ "$current_status" != "$last_status" ]; then
+    echo "[ae] Files changed, restarting: $cmd"
+    
+    kill_process
+    sleep 5  # Pause to let the OS reclaim resources
+    
+    echo "[ae] Starting new process..."
+    #setsid bash -c "$cmd" > >(tee /dev/tty) 2>&1 &
+    setsid bash -c "$cmd" &
+    pid=$!
+    echo "[ae] New process started with PID: $pid"
+    pgrp=$(ps -o pgid= -p "$pid" | tr -d ' ')
+    echo "[ae] New process group: $pgrp"
+    
+    last_status="$current_status"
+  fi
+done
+
