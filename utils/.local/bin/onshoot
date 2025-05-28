@@ -1,0 +1,197 @@
+#!/bin/bash
+
+# onshoot - Simple card import manager
+set -e
+
+PROJECTS_DIR="$HOME/Projects"
+CONFIG_DIR="$HOME/.config/onshoot"
+CURRENT_PROJECT_FILE="$CONFIG_DIR/current_project"
+
+mkdir -p "$PROJECTS_DIR" "$CONFIG_DIR"
+
+get_current_project() {
+    [[ -f "$CURRENT_PROJECT_FILE" ]] && cat "$CURRENT_PROJECT_FILE"
+}
+
+set_current_project() {
+    echo "$1" > "$CURRENT_PROJECT_FILE"
+}
+
+detect_cards() {
+    local cards=()
+
+    if [[ -d "/run/media/$USER" ]]; then
+        find "/run/media/$USER" -maxdepth 1 -mindepth 1 -type d -readable 2>/dev/null
+    fi
+
+    lsblk -rno MOUNTPOINT,RM,FSTYPE 2>/dev/null | while read -r mount rm fs; do
+        if [[ "$rm" == "1" && -n "$fs" && -n "$mount" && -d "$mount" && "$mount" != "/run/media/"* ]]; then
+            echo "$mount"
+        fi
+    done
+}
+
+select_project() {
+    local projects
+    projects=$(find "$PROJECTS_DIR" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | sort)
+
+    [[ -z "$projects" ]] && { echo "No projects found"; return 1; }
+
+    local selected
+    selected=$(echo "$projects" | fzf --prompt "Select project: ")
+
+    [[ -n "$selected" ]] && {
+        set_current_project "$selected"
+        echo "Selected: $selected"
+    }
+}
+
+create_project() {
+    read -rp "Project name: " name
+    [[ -z "$name" ]] && { echo "Name required"; return 1; }
+
+    local path="$PROJECTS_DIR/$name"
+    [[ -d "$path" ]] && { echo "Project exists"; return 1; }
+
+    mkdir -p "$path"
+    set_current_project "$name"
+    echo "Created: $name"
+}
+
+sync_card() {
+    local project
+    project=$(get_current_project)
+
+    [[ -z "$project" ]] && { echo "No project selected"; return 1; }
+
+    local cards
+    cards=$(detect_cards)
+    [[ -z "$cards" ]] && { echo "No cards detected"; return 1; }
+
+    local card
+    if [[ $(echo "$cards" | wc -l) -eq 1 ]]; then
+        card="$cards"
+    else
+        card=$(echo "$cards" | fzf --prompt "Select card: ")
+    fi
+
+    local type
+    type=$(printf "video\naudio\n" | fzf --prompt "Content type: ")
+    [[ -z "$type" ]] && return
+
+    local today target
+    today=$(date '+%Y-%m-%d')
+    target="$PROJECTS_DIR/$project/$today/$type"
+    mkdir -p "$target"
+
+    echo "Syncing $card -> $target"
+    if rsync -avh --progress "$card/" "$target/"; then
+        echo "Sync completed"
+
+        echo "Generating checksums..."
+        (cd "$target" && find . -type f ! -name 'CHECKSUMS.txt' ! -name 'TRANSFER_REPORT.txt' -exec md5sum "{}" + > CHECKSUMS.txt)
+
+        echo "Verifying checksums..."
+        local report_file="$target/TRANSFER_REPORT.txt"
+        local result
+        result=$(cd "$target" && md5sum -c CHECKSUMS.txt 2>&1)
+
+        local errors
+        errors=$(echo "$result" | grep -v ': OK' || true)
+        local file_count
+        file_count=$(grep -c -v 'TRANSFER_REPORT.txt\|CHECKSUMS.txt' <<< "$(find "$target" -type f)")
+
+        {
+            echo "Transfer Report - $(date)"
+            echo "Source: $card"
+            echo "Destination: $target"
+            echo "Files transferred: $file_count"
+            echo
+            echo "Checksum verification:"
+            if [[ -z "$errors" ]]; then
+                echo "✅ All checksums matched successfully."
+            else
+                echo "❌ Some files failed checksum verification:"
+                echo "$errors"
+            fi
+        } > "$report_file"
+
+        cat "$report_file"
+
+        if printf "Yes\nNo\n" | fzf --prompt "Eject card? " | grep -q "Yes"; then
+            eject_card "$card"
+        fi
+    else
+        echo "Sync failed"
+    fi
+}
+
+eject_card() {
+    local card="$1"
+
+    if [[ -z "$card" ]]; then
+        local cards
+        cards=$(detect_cards)
+        [[ -z "$cards" ]] && { echo "No cards to eject"; return 1; }
+
+        if [[ $(echo "$cards" | wc -l) -eq 1 ]]; then
+            card="$cards"
+        else
+            card=$(echo "$cards" | fzf --prompt "Eject which card: ")
+        fi
+    fi
+
+    local device
+    device=$(findmnt -no SOURCE "$card")
+
+    if udisksctl unmount -b "$device" && udisksctl power-off -b "$device"; then
+        echo "Card ejected"
+    else
+        echo "Failed to eject"
+    fi
+}
+
+main_menu() {
+    local current
+    current=$(get_current_project)
+
+    echo "onshoot - Current project: ${current:-None}"
+
+    local menu="1. Select project
+2. Create new project
+3. Sync card ("${current:-None}")
+4. Eject card
+5. Exit"
+
+    local choice
+    choice=$(echo "$menu" | fzf --prompt "onshoot - what to do: ")
+
+    case "$choice" in
+        "1. Select project") select_project ;;
+        "2. Create new project") create_project ;;
+        "3. Sync card (${current:-None})") sync_card ;;
+        "4. Eject card") eject_card ;;
+        "5. Exit") exit 0 ;;
+    esac
+}
+
+# Check dependencies
+for cmd in fzf rsync sha256sum; do
+    if ! command -v "$cmd" >/dev/null; then
+        echo "Error: $cmd not found"
+        exit 1
+    fi
+done
+
+# Handle --auto flag (called by udev)
+if [[ "${1:-}" == "--auto" ]]; then
+    sleep 2
+    main_menu
+    exit 0
+fi
+
+# Interactive loop
+while true; do
+    main_menu
+done
+

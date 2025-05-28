@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+DOTFILES="$HOME/dotfiles"
+cd "$DOTFILES"
+
+app=$(find . -mindepth 1 -maxdepth 1 -type d | fzf --prompt="⚙️ App: ")
+[ -z "$app" ] && exit 0
+
+file=$(find $app -mindepth 1 -maxdepth 3 -type f | fzf --prompt "📄	File: ")
+[ -z "$file" ] && file="$app"
+
+nvim - "$file"
