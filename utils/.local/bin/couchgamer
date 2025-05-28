@@ -1,44 +1,53 @@
 #!/usr/bin/env bash
 
-function TAILSCALE {
-  TS_UP=$(ip link | grep -i "tailscale")
-  if [ "$TS_UP" ]; then 
-    echo "Shutting down tailnet.."
-    tailscale down
+function STEAM_DOWN {
+  # Is steam running?
+  if [ "$(pgrep -a steam)" != 0 ]; then
+    kill -15 `pidof steam`
+    echo "Restart steam.."
   fi
-}
-function TAILESCALE_RECONNECT {
-  doas tailscale up
-}
 
+}
 function GAMEMODE {
-  RANDR=$(where xrandr)
-  STATUS="$("$RANDR" | grep -w connected | grep 3440)"
-  if [ $? != 0]; then
-    "$HOME/.screenlayout/gamestreaming"
+  RANDR=$(/usr/bin/which xrandr)
+  STATUS=$("$RANDR" | grep -w connected | grep 3440)
+  if [ $? == 0 ]; then
+    /bin/sh /home/mr/.screenlayout/gamestreaming
     echo "Setting aspect ratio to 16x9.. (2560x1440)"
   fi
 }
 function DESKTOPMODE {
-  "$HOME/.screenlayout/extra-left-vertical.sh"
+  cd /home/mr/.screenlayout
+  /bin/sh extra-left-vertical.sh
   echo "Re-setting DP-0 aspect ratio to 21:10... (3440x1440)"
 }
+function TAILSCALE_DOWN {
+  TS_UP=$(ip link | grep -i "tailscale")
+  STEAM_DOWN
+  if [ "$TS_UP" ]; then 
+    echo "Shutting down tailnet.."
+    tailscale down
+  fi
 
+}
+function TAILSCALE_UP {
+  tailscale up
+}
 function MUTE {
   amixer set Master mute
   echo "Muting host..."
 }
-
 function LAUNCH {
-  LOCATION="$(which steam)"
+
+  LOCATION="$(/usr/bin/which steam)"
   echo "Launching ..."
   "$LOCATION" -gamepadui %u -forcedesktopscaling 1
 }
 
-TAILSCALE
-MATCH_RESOLUTION
+TAILSCALE_DOWN
+STEAM_DOWN
+GAMEMODE
 MUTE
 LAUNCH
 DESKTOPMODE
-TAILSCALE_RECONNECT
-
+TAILSCALE_UP

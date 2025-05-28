@@ -4,14 +4,42 @@
 
 set -e
 
-SERVER_URL="https://tshare.porgy-ruler.ts.net"
+SERVER_URL="https://api.terminal-share.workers.dev"
+VERSION="1.1.1"
 DEFAULT_SYNTAX="bash" 
-CLIPBOARD_CMD="wl-copy" # Use xclip if you are x11
 
-# Check for macOS
-if [[ "$(uname)" == "Darwin" ]]; then
-  CLIPBOARD_CMD="pbcopy"
+# Check for SSH session
+if [[ -n "$SSH_CLIENT" || -n "$SSH_TTY" ]]; then
+  IS_SSH=true
+else
+  IS_SSH=false
 fi
+
+
+# Function to copy to clipboard with fallbacks
+copy_to_clipboard() {
+  local url="$1"
+  
+  if [[ "$IS_SSH" == "true" ]]; then
+    # Try OSC 52 escape sequence first
+    printf "\e]52;c;$(printf %s "$url" | base64)\a"
+    # Provide manual copy instructions
+    echo "Remote session detected. You can manually copy the URL above."
+    return 0
+  fi
+  
+  # Local clipboard handling
+  if [[ "$(uname)" == "Darwin" ]]; then
+    printf "%s" "$url" | pbcopy
+  elif [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
+    printf "%s" "$url" | xclip -sel clip
+  elif command -v wl-copy &> /dev/null; then
+    printf "%s" "$url" | wl-copy
+  else
+    echo "No clipboard utility found. Please copy the URL manually."
+    return 1
+  fi
+}
 
 # Function to show help
 show_help() {
@@ -20,17 +48,58 @@ show_help() {
   echo
   echo "Options:"
   echo "  -h, --help            Show this help message"
-  echo "  -s, --syntax SYNTAX   Specify syntax highlighting (default: auto-detected)"
+  echo "  -s, --syntax SYNTAX   Specify syntax highlighting (-s none for no highlighting)"
   echo "  -n, --no-clipboard    Don't copy URL to clipboard"
   echo "  -q, --quiet           Suppress command output (only show URL)"
   echo "  -u, --url URL         Specify server URL (default: $SERVER_URL)"
+  echo "  -v, --version         Show version information"
+  echo "  -su, --self-update    Check for updates and update the script"
+  echo "  -c, --clean           Strip ANSI escape sequences from command output"
   echo
   echo "Examples:"
   echo "  tshare ls -la                # Share output of ls -la"
   echo "  tshare -s python script.py   # Share with Python syntax highlighting"
   echo "  tshare -q ls -la             # Share output silently (only show URL)"
+  echo "  tshare -c pfetch             # Share pfetch output without ANSI color codes"
   exit 0
 }
+
+# Update function
+update_script() {
+  local script_url="https://tshare.porgy-ruler.ts.net/tshare"
+  local script_path="$(which tshare 2>/dev/null || true)"
+  
+  if [[ -z "$script_path" ]]; then
+    echo "Error: Unable to locate the tshare script. Please ensure it is installed and in your PATH."
+    return 1
+  fi
+
+  read -ep "Do you want to download the latest version of tshare and install it in your path? (y/n): " -i "y" update_choice
+  if [[ "$update_choice" =~ ^[Yy]$ ]]; then
+    echo "Updating $script_path..."
+    
+    # Check if the script path is writable
+    if [[ -w "$script_path" ]]; then
+      curl --progress-bar -o "$script_path" "$script_url" && chmod +x "$script_path"
+      echo "Update complete"
+    else
+      echo "To update $script_path please provide your password for sudo access."
+      if command -v sudo &> /dev/null; then
+        sudo curl --progress-bar -o "$script_path" "$script_url" && sudo chmod +x "$script_path"
+        if [[ $? -eq 0 ]]; then
+          echo "Update complete."
+        else
+          echo "Update failed. Please check your permissions or try again."
+        fi
+      else
+        echo "Error: sudo is not available. Please update the script manually."
+      fi
+    fi
+  else
+    echo "Update skipped - if you experience issues with tshare or its output, please update it with 'tshare -su' or running the install command from the website again manually."
+  fi
+}
+
 
 # Detect syntax based on command
 detect_syntax() {
@@ -149,6 +218,8 @@ detect_syntax() {
 USE_CLIPBOARD=true
 QUIET=false
 SYNTAX_SPECIFIED=false
+STRIP_ANSI=false  # Default to preserving ANSI codes
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help)
@@ -171,6 +242,18 @@ while [[ $# -gt 0 ]]; do
       QUIET=true
       shift
       ;;
+    -c|--clean)
+      STRIP_ANSI=true
+      shift
+      ;;
+    -v|--version)
+      echo "tshare version $VERSION"
+      exit 0
+      ;;
+    -su|--self-update)
+      update_script
+      exit 0
+      ;;
     *)
       break
       ;;
@@ -189,7 +272,6 @@ COMMAND_STR="$*"
 # Auto-detect syntax if not manually specified
 if [[ "$SYNTAX_SPECIFIED" != "true" ]]; then
   DEFAULT_SYNTAX=$(detect_syntax "$COMMAND_STR")
-  echo "Auto-detected syntax: $DEFAULT_SYNTAX"
 fi
 
 # Temporary file for command output
@@ -221,20 +303,50 @@ upload_and_show_url() {
   # Read content
   CONTENT=$(cat "$OUTPUT_FILE")
   
+  # Strip ANSI escape codes if requested
+  strip_ansi_codes() {
+    # Remove color codes and other terminal escape sequences
+    # This pattern matches most common ANSI escape sequences
+    sed 's/\x1b\[[0-9;]*[a-zA-Z]//g; s/\x1b(B//g; s/\x1b\[[0-9;]*m//g'
+  }
+  
+  if [[ "$STRIP_ANSI" == "true" ]]; then
+    CONTENT=$(echo "$CONTENT" | strip_ansi_codes)
+  fi
+  
   # Function to escape JSON strings
   escape_json() {
     local content="$1"
+    # More thorough JSON escaping
     content="${content//\\/\\\\}"         # Escape backslashes
     content="${content//\"/\\\"}"         # Escape double quotes
     content="${content//$'\n'/\\n}"       # Escape newlines
     content="${content//$'\t'/\\t}"       # Escape tabs
     content="${content//$'\r'/\\r}"       # Escape carriage returns
-    echo "$content"
+    # Handle additional special characters
+    content="${content//$'\f'/\\f}"       # Form feeds
+    content="${content//$'\b'/\\b}"       # Backspaces
+    # Handle control characters and other non-printable characters
+    local i=0
+    local char
+    local result=""
+    while [ $i -lt ${#content} ]; do
+      char="${content:$i:1}"
+      if [[ $(LC_CTYPE=C printf "%d" "'$char") -lt 32 ]]; then
+        # Convert control character to unicode escape sequence
+        printf -v hex_val "%04x" "'$char"
+        result+="\\u$hex_val"
+      else
+        result+="$char"
+      fi
+      ((i++))
+    done
+    echo "$result"
   }
   
   # Upload to the server
   if [[ "$QUIET" != "true" ]]; then
-    echo "Uploading output..."
+    echo ""
   fi
   
   if command -v curl &> /dev/null; then
@@ -249,41 +361,48 @@ upload_and_show_url() {
            \"command\": \"$ESCAPED_COMMAND\",
            \"hostname\": \"$HOSTNAME\",
            \"workingDir\": \"$ESCAPED_DIR\",
-           \"syntax\": \"$DEFAULT_SYNTAX\"
+           \"syntax\": \"$DEFAULT_SYNTAX\",
+           \"exitCode\": \"$(cat "$EXIT_CODE_FILE")\"
          }")
   
     # Extract URL from response
     URL=$(echo "$RESPONSE" | grep -o '"url":"[^"]*"' | sed 's/"url":"\(.*\)"/\1/')
-  
+    
+    # Extract server version from the response
+    SERVER_VERSION=$(echo "$RESPONSE" | grep -o '"serverVersion":"[^"]*"' | sed 's/"serverVersion":"\(.*\)"/\1/')
+
+    # Compare server version with local version
+    if [[ -n "$SERVER_VERSION" && "$SERVER_VERSION" != "$VERSION" ]]; then
+      if [[ "$(printf '%s\n' "$SERVER_VERSION" "$VERSION" | sort -V | head -n1)" == "$VERSION" ]]; then
+        echo -e "\n\e[1;33m[!] A newer version ($SERVER_VERSION) is available. Run 'tshare -su' to update.\e[0m"
+      fi
+    fi
+
+    # Ensure the URL is displayed and copied to clipboard
     if [[ -z "$URL" ]]; then
       echo "Error: Failed to get URL from server response"
       echo "Server response: $RESPONSE"
       return 1
     fi
+
+    # Display the URL
+    if [[ "$QUIET" != "true" ]]; then
+      echo -e "\e[1mShare URL: $URL\e[0m"
+    else
+      echo "$URL"
+    fi
+
+    # Copy to clipboard if available
+    if [[ "$USE_CLIPBOARD" == "true" ]]; then
+      if copy_to_clipboard "$URL"; then
+        echo "URL copied to clipboard"
+      else
+        echo "Could not copy to clipboard"
+      fi
+    fi
   else
     echo "Error: curl is required for this script"
     return 1
-  fi
-  
-  # Output the URL with better visibility
-  echo ""  # Blank line before URL
-  if [[ -t 1 ]]; then  # Check if stdout is a terminal
-    echo -e "\e[1mShare URL: $URL\e[0m"  # Bold if terminal supports it
-  else
-    echo "Share URL: $URL"
-  fi
-  
-  # Copy to clipboard if available
-  if [[ "$USE_CLIPBOARD" == "true" ]]; then
-    if eval "$CLIPBOARD_CMD" <<< "$URL" 2>/dev/null; then
-      if [[ "$QUIET" != "true" ]]; then
-        echo "URL copied to clipboard"
-      fi
-    else
-      if [[ "$QUIET" != "true" ]]; then
-        echo "Clipboard command failed or not available"
-      fi
-    fi
   fi
 }
 
@@ -291,15 +410,11 @@ upload_and_show_url() {
 HOSTNAME=$(hostname)
 WORKING_DIR=$(pwd)
 
-# Run the command and capture output
+# Ensure the -q flag suppresses command output but still displays the URL and version check
 if [[ "$QUIET" == "true" ]]; then
   "$@" > "$OUTPUT_FILE" 2>&1
   echo $? > "$EXIT_CODE_FILE"
 else
-  echo "Running: $COMMAND_STR"
-  "$@" | tee "$OUTPUT_FILE"
+  { "$@" 2>&1 | tee "$OUTPUT_FILE"; }
   echo ${PIPESTATUS[0]} > "$EXIT_CODE_FILE"
 fi
-
-# Rest of the script will be handled by the exit trap
-

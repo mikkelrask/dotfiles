@@ -4,14 +4,17 @@
 $HOME/.local/bin/ifinstalled dmenu feh dunst 
 [ $? -ne 0 ] && exit 1
 
-OPTION=$(ls "$HOME/Pictures/wallpaper/" | dmenu -l 10 -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724')
+WALLPAPERS=$(ls -R /home/mr/Pictures/wallpapers/*/*.{jpg,png})
+
+OPTION=$(echo "$WALLPAPERS" | dmenu -i -l 10 -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724')
 
 if [ -z "$OPTION" ]; then 
   exit 0
 fi
+[ "$OPTION" == "random" ] && OPTION=$(echo "$WALLPAPERS" | shuf -n 1)
 
-feh --bg-fill "$HOME/Pictures/$THEME/$OPTION"
-notify-send -i "$HOME/.local/bin/info.png" -c info -a "wallsetter" "wallsetter" "$OPTION set as wallpaper"
+feh --bg-fill "$OPTION"
+notify-send -a "$(hostname)" -i "/home/mr/.config/dunst/icons/wallsetter.svg" -c info -r 2000 "wallsetter" "$OPTION is set wallpaper"
 
-OPTION_WITH_PATH="$HOME/Pictures/rose-pine/$OPTION"
-sed -i "s|WALLPAPER=.*|WALLPAPER=$OPTION_WITH_PATH|g" "$HOME/.zshenv" || notify-send -c warning -i "$HOME/.local/bin/warn.png" -a "wallsetter" "wallsetter" "Could not set $WALLPAPER variable. Wallpaper setting will not persist after reboot/relog"
+OPTION_WITH_PATH="$OPTION"
+sed -i "s|WALLPAPER=.*|WALLPAPER=$OPTION|g" "$HOME/.zshenv" || notify-send -c warning -i "$HOME/.local/bin/warn.png" -a "$(hostname)" "wallsetter" "Could not set $WALLPAPER variable. Wallpaper setting will not persist after reboot/relog"
