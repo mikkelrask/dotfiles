@@ -1,60 +1,60 @@
 [user]
   name = Mikkel Rask
   email = mikkelrask@protonmail.com
-  signingkey = /home/mr/.ssh/id_rsa.pub  
+  signingkey = /home/mr/.ssh/id_rsa
 
 [core]
-  compression = 9
+  compression = 9 # Jo højere tal, jo længere tid tager det at eks. clone repos, skifte imellem branches o.l
   whitespace = error
-  preloadindex = true
+  preloadindex = true # preloader fx `status` indholdet, så det er mere snappy
 
 [advice]
-  addEmptyPathspec = false
-  pushNonFastForward = false
-  statusHints = false
+  addEmptyPathspec = false # Undertrykker fejlbeskeder ved fx `git add ` uden at faktisk specificere en fil
+  pushNonFastForward = false # Advarer hvis et push vil overskrive remote commits
+  statusHints = false # fjerner `git status` hints a la "use git add to .."
   
-[url "git@github.com:mikkelrask/"]
-  insteadOf = "mr:"
+[url "git@github.com:mikkelrask/"] # Basicly et "alias"
+  insteadOf = "mr:" # fx git clone mr:doomed-scandinavia.git = git clone git@github.com:mikkelrask/doomed-scandinavia.git
 
-[url "git@github.com:"]
-  insteadOf = "gh:"
+[url "git@github.com:"] 
+  insteadOf = "gh:" # fx git clone gh:rasmuswoelk/laravel4-sublimetext-helper.git = git@github.com:rasmuswoelk/laravel4-sublime-helper.git
 
 [init]
-  defaultBranch = dev
+  defaultBranch = dev # når du init'er et nyt repo er din branch automatisk `dev`
 
 [status]
-  branch = true
-  showStatus = true
-  showUntrackedFiles = all
+  branch = true # vis nuværende branch navn ved `git status`
+  showStatus = true # Vis status info ved interaktive commands
+  showUntrackedFiles = all # Viser også untracked files i undermapper
 
 [diff]
-  context = 3
+  context = 3 # Tilføjre 3 linjers kode rundt om alle ændringer for kontekst
   renames = copies
-  interHunkContext = 10
-  tabs = 2
+  interHunkContext = 10 # 🤷
+  tabs = 2 # tres commas
 
-[pager]
-  diff = diff-so-fancy | $PAGER
+[pager] # Syntax highlighting på diffs
+  diff = diff-so-fancy | less --tabs=2 -RFX # Kan installeres med `brew install diff-so-fancy` eller `npm i -g diff-so-fancy`- https://github.com/so-fancy/diff-so-fancy
 
 [interactive]
-  diffFilter = diff-so-fancy --patch
-  singlekey = true
+  diffFilter = diff-so-fancy --patch # git add --patch bruger diff-so-fancy for syntax highlighting
+  singlekey = true # Ved patching skal man ikke bekræfte fx y/n prompts med enter
 
 [push]
-  autoSetupRemote = true
-  default = current
-  followTags = true
+  autoSetupRemote = true # Sæt automatisk remote origin til din lokalt oprettede branch
+  default = current # Push altid til den branch du er åp
+  followTags = true # Push altid tags 
 
 [pull]
-  default = current
-  rebase = false
+  default = current # Pull den branch du er på
+  rebase = false # Merge < rebase
 
 [rebase]
-  autoStash = true
+  autoStash = true # Stash automatisk eventuelle uncomittede ændringer før en rebase
   missingCommitChecks = warn
 
 [log]
-  abbrevCommit = true
+  abbrevCommit = true # brug shorthand commit hashes 
   graphColors = blue,yellow,cyan,magenta,green,red
 
 [color "decorate"]
@@ -65,23 +65,24 @@
 
 [color "branch"]
   current = magenta
-  local = default
+  local = cyan
   remote = yellow
   upstream = green
   plain = blue
 
 [branch]
-  sort = -committerdate
+  sort = -committerdate # Nyeste øverst fjern `-` for ældste øverst
 
 [tag]
   sort = -taggerdate
 
 [pager]
-  branch = true
-  tag = true
+  branch = true # Branch graph ved fx `git diff`
+  tag = true # 
 
 [gpg]
-  format = ssh
+  format = ssh # brug ssh key til at signe commits o.l i stedet for regulær gpg
 
 [commit]
-  gpgsign = true
+  gpgsign = true # Få det fancy grønne "Verified" badge når du comitter
+  template = /home/mr/.config/git/template

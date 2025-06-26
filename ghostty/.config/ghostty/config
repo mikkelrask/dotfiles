@@ -1,5 +1,6 @@
 #font-family = "FantasqueSansM Nerd Font Propo"
 font-family = "IosevkaTerm NF"
+#font-family = "CaskaydiaCove NF"
 font-size = 14
 background-opacity = 0.9
 window-decoration = false

@@ -1,9 +1,10 @@
-export BROWSER=flatpak run app.zen_browser.zen
+export BROWSER=librefox
 export FILES=nautilus
 export VISUAL=code
 export EDITOR=nvim
 export TERMINAL=ghostty
 export PLAYER=mpv
+export PAGER=less
 export DOTFILES_HOMEDIR=$HOME/Documents/dotfiles
 export XDG_CONFIG_HOME=$HOME/.config
 export THEME=rose-pine
@@ -11,4 +12,9 @@ export WALLPAPER=/home/mr/Pictures/rose-pine/rose_pine_maze.png
 export FLAKE="/home/mr/.nixos"
 export PATH="$HOME/.local/share/applications:$PATH"
 export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz
-. "$HOME/.cargo/env"
+export PNPM_HOME="/home/mr/.local/share/pnpm"
+export NVM_DIR="$HOME/.config/nvm"
+#[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export MOZ_ENABLE_WAYLAND=1 
+export MOZ_USE_XINPUT2=1
