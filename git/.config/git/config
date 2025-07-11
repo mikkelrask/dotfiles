@@ -19,6 +19,9 @@
 [url "git@github.com:"] 
   insteadOf = "gh:" # fx git clone gh:rasmuswoelk/laravel4-sublimetext-helper.git = git@github.com:rasmuswoelk/laravel4-sublime-helper.git
 
+[url "https://aur.archlinux.org/"] 
+  insteadOf = "aur:" # fx git clone gh:rasmuswoelk/laravel4-sublimetext-helper.git = git@github.com:rasmuswoelk/laravel4-sublime-helper.git
+
 [init]
   defaultBranch = dev # når du init'er et nyt repo er din branch automatisk `dev`
 
