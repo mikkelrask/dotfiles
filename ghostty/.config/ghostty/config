@@ -1,13 +1,14 @@
 #font-family = "FantasqueSansM Nerd Font Propo"
-font-family = "IosevkaTerm NF"
-#font-family = "CaskaydiaCove NF"
+#font-family = "IosevkaTerm NF"
+font-family = "CaskaydiaCove NF"
 font-size = 14
-background-opacity = 0.9
-window-decoration = false
+background-opacity = 0.8
+window-decoration = true
+shell-integration = zsh
 window-padding-x = 12
 window-padding-y = 12
 mouse-hide-while-typing = true
-grapheme-width-method = legacy
+#grapheme-width-method = legacy
 theme = "tokyonight"
 
 
