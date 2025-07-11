@@ -18,6 +18,13 @@ __TMEX_LAUNCH () {
 ┊ tmex 'WRITEUP' -f=1 -t -l=13{211} v  'bun i' cava cmatrix -w 'bun run serve'                                                                                               
 }         
 
+aur() {
+  local PACKAGE="$1"
+  local URL="https://aur.archlinux.org/packages/$PACKAGE"
+  echo "Opening $URL in $BROWSER"
+  $BROWSER --new-tab $URL
+}
+
 slugify_files() {
   for file in *; do
     # Extract filename and extension

@@ -1,8 +1,9 @@
-export BROWSER=librefox
-export FILES=nautilus
-export VISUAL=code
+export BROWSER=librewolf
+export FILES=dolphin
+export VISUAL=nvim
 export EDITOR=nvim
 export TERMINAL=ghostty
+export TERM=xterm-ghostty
 export PLAYER=mpv
 export PAGER=less
 export DOTFILES_HOMEDIR=$HOME/Documents/dotfiles
@@ -10,7 +11,7 @@ export XDG_CONFIG_HOME=$HOME/.config
 export THEME=rose-pine
 export WALLPAPER=/home/mr/Pictures/rose-pine/rose_pine_maze.png
 export FLAKE="/home/mr/.nixos"
-export PATH="$HOME/.local/share/applications:$PATH"
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$HOME/.local/share/applications:$PATH"
 export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz
 export PNPM_HOME="/home/mr/.local/share/pnpm"
 export NVM_DIR="$HOME/.config/nvm"

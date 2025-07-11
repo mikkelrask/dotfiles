@@ -48,7 +48,7 @@ alias clone="git clone"
 alias push='git push'
 alias pull='git pull'
 alias status='git status --short'
-alias gs='git status'
+alias gs='git status --short'
 
 # Package manager
 alias i="install"
@@ -76,3 +76,5 @@ alias get-class="xprop | grep CLASS | awk '{print $4}'"
 alias MCA='~/.local/bin/java/zulu/bin/java -jar ~/.local/bin/mcaselector-2.4.jar'
 alias dsbul="docker compose down --volume && docker compose build --no-cache && docker compose up -d && docker compose logs -f"
 alias dsbul="docker compose down --volumes && docker compose build --no-cache && docker compose up -d && docker compose logs -f"
+alias chmox=chmod
+alias lzg=lazygit
