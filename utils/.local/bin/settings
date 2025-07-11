@@ -1,12 +1,34 @@
 #!/usr/bin/env bash
 
-DOTFILES="$HOME/dotfiles"
-cd "$DOTFILES"
+DOTFILES="$HOME/.config"
+cd "$DOTFILES" || exit 1
 
-app=$(find . -mindepth 1 -maxdepth 1 -type d | fzf --prompt="⚙️ App: ")
+# Detect if inside tmux
+FZF_OPTS=""
+if [[ -n $TMUX ]]; then
+    FZF_OPTS="--tmux"
+fi
+
+# Select app directory (dirs and symlinks that resolve to dirs)
+app=$(find . -mindepth 1 -maxdepth 1 -exec test -d {} \; -print | fzf $FZF_OPTS --prompt="⚙️ App: ")
 [ -z "$app" ] && exit 0
 
-file=$(find $app -mindepth 1 -maxdepth 3 -type f | fzf --prompt "📄	File: ")
-[ -z "$file" ] && file="$app"
+# Clean up leading './'
+app="${app#./}"
+full_path="$DOTFILES/$app"
 
-nvim - "$file"
+# Corrected: mindepth/maxdepth BEFORE expressions
+mapfile -d '' files < <(find -L "$full_path" -mindepth 1 -maxdepth 3 -type f -print0)
+
+if [[ ${#files[@]} -eq 0 ]]; then
+    file="$full_path"
+else
+    file=$(printf '%s\n' "${files[@]}" | fzf $FZF_OPTS --prompt="📄 File: " \
+        --preview 'bat --style=numbers --color=always --line-range :100 {}' \
+        --preview-window=right:60%)
+fi
+
+[ -z "$file" ] && file="$full_path"
+
+nvim "$file"
+
