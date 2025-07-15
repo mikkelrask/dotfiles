@@ -1,0 +1,120 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install ZSH
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y zsh curl
+    
+    - name: Test plugin loading
+      run: |
+        zsh -c "
+          source zsh-ai.plugin.zsh
+          if [[ -z \"\$ZSH_AI_PROVIDER\" ]]; then
+            echo 'ERROR: Plugin failed to load'
+            exit 1
+          fi
+          echo '✓ Plugin loaded successfully'
+          echo \"  Provider: \$ZSH_AI_PROVIDER\"
+        "
+    
+    - name: Test configuration validation
+      run: |
+        zsh -c "
+          source zsh-ai.plugin.zsh
+          
+          # Test anthropic provider validation
+          export ZSH_AI_PROVIDER='anthropic'
+          export ANTHROPIC_API_KEY='test-key'
+          if _zsh_ai_validate_config; then
+            echo '✓ Anthropic provider validation passed'
+          else
+            echo 'ERROR: Anthropic provider validation failed'
+            exit 1
+          fi
+          
+          # Test ollama provider validation
+          export ZSH_AI_PROVIDER='ollama'
+          if _zsh_ai_validate_config; then
+            echo '✓ Ollama provider validation passed'
+          else
+            echo 'ERROR: Ollama provider validation failed'
+            exit 1
+          fi
+          
+          # Test invalid provider rejection
+          export ZSH_AI_PROVIDER='invalid'
+          if ! _zsh_ai_validate_config 2>/dev/null; then
+            echo '✓ Invalid provider correctly rejected'
+          else
+            echo 'ERROR: Invalid provider not rejected'
+            exit 1
+          fi
+        "
+    
+    - name: Test context detection
+      run: |
+        zsh -c "
+          source zsh-ai.plugin.zsh
+          
+          # Test project type detection
+          touch package.json
+          project_type=\$(_zsh_ai_detect_project_type)
+          if [[ \"\$project_type\" == 'node' ]]; then
+            echo '✓ Node.js project detection works'
+          else
+            echo 'ERROR: Failed to detect Node.js project'
+            exit 1
+          fi
+          rm package.json
+          
+          # Test Python project detection
+          touch requirements.txt
+          project_type=\$(_zsh_ai_detect_project_type)
+          if [[ \"\$project_type\" == 'python' ]]; then
+            echo '✓ Python project detection works'
+          else
+            echo 'ERROR: Failed to detect Python project'
+            exit 1
+          fi
+        "
+    
+    - name: Test zsh-ai command exists
+      run: |
+        zsh -c "
+          source zsh-ai.plugin.zsh
+          if command -v zsh-ai >/dev/null 2>&1; then
+            echo '✓ zsh-ai command is available'
+          else
+            echo 'ERROR: zsh-ai command not found'
+            exit 1
+          fi
+        "
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install shellcheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+    
+    - name: Run shellcheck
+      run: |
+        # Shellcheck all shell scripts (zsh files use bash compatibility mode)
+        find . -name "*.zsh" -o -name "*.sh" | xargs shellcheck -s bash -e SC1090,SC1091,SC2034,SC2154 || true
