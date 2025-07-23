@@ -8,14 +8,10 @@
     password: None,
     theme: "nord",
 
-
-
-
-
     on_song_change: ["/home/mr/.config/rmpc/increment_play_count"], 
-    volume_step: 5,
+    volume_step: 2,
     max_fps: 30,
-    scrolloff: 0,
+    scrolloff: 1,
     wrap_navigation: false,
     enable_mouse: true,
     status_update_interval_ms: 1000,
@@ -40,19 +36,19 @@
             "2":       SwitchToTab("Artists"),
             "3":       SwitchToTab("Albums"),
             "4":       SwitchToTab("Search"),
-            "5":       SwitchToTab("Directories"),
+            "5":       SwitchToTab("Playlists"),
             "6":       SwitchToTab("Lyrics"),
             "q":       Quit,
-            ">":       NextTrack,
+            ".":       NextTrack,
             "p":       TogglePause,
-            "<":       PreviousTrack,
-            "f":       SeekForward,
+            ",":       PreviousTrack,
+            "<Right>":       SeekForward,
             "z":       ToggleRepeat,
             "x":       ToggleRandom,
             "c":       ToggleConsume,
             "v":       ToggleSingle,
-            "b":       SeekBack,
-            "~":       ShowHelp,
+            "<Left>":       SeekBack,
+            "?":       ShowHelp,
             "I":       ShowCurrentSongInfo,
             "O":       ShowOutputs,
             "P":       ShowDecoders,
@@ -119,15 +115,29 @@
     ),
     tabs: [
         (
-            name: "Queue",
-            pane: Split(
+          name: "Queue",
+          pane: Split(
+            direction: Vertical,
+            panes: [
+              (size: "80%", pane: Split(
                 direction: Horizontal,
-                panes: [(size: "20%", pane: Pane(AlbumArt)), (size: "80%", pane: Pane(Queue))],
-            ),
+                panes: [
+                  (size: "25%", pane: Split(
+                    direction: Vertical,
+                    panes: [
+                      (size: "30%", pane: Pane(AlbumArt)),
+                      (size: "70%", pane: Pane(Lyrics))
+                    ])),
+                  (size: "75%", pane: Pane(Queue))
+                ],
+              )),
+              (size: "20%", pane: Pane(Cava))
+            ],
+          ),
         ),
         (
             name: "Artists",
-            pane: Pane(Artists),
+            pane: Pane(AlbumArtists),
         ),
         (
             name: "Albums",
@@ -138,14 +148,14 @@
             pane: Pane(Search),
         ),
         (
-            name: "Directories",
-            pane: Pane(Directories),
+            name: "Playlists",
+            pane: Pane(Playlists),
         ),
         (
             name: "Lyrics",
             pane: Split(
                 direction: Vertical,
-                panes: [(size: "25%", pane: Pane(AlbumArt)), (size: "70%", pane: Pane(Lyrics), vertical_align: Bottom)],
+                panes: [(size: "40%", pane: Pane(AlbumArt)), (size: "60%", pane: Pane(Lyrics), vertical_align: Bottom)],
             ),
         ),
     ],

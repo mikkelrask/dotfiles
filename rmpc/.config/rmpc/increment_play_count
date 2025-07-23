@@ -6,3 +6,5 @@ if [ -z "$sticker" ]; then
 else
     rmpc sticker set "$FILE" "playCount" "$((sticker + 1))"
 fi
+
+rmpc song | /home/mr/dotfiles/utils/.local/bin/player-notification.sh

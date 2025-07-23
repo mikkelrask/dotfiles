@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+REPO_DIR=~/Repos
+
+fzf_tmux_flag=""
+if [ -n "$TMUX" ]; then
+    fzf_tmux_flag="--tmux"
+fi
+
+# FZF to select repo
+repo_path=$(find "$REPO_DIR" -mindepth 1 -maxdepth 1 -type d | fzf $fzf_tmux_flag --prompt="📁 Pick a repo: ")
+[ -z "$repo_path" ] && exit 0
+
+session_name=$(basename "$repo_path")
+
+if [ -n "$TMUX" ]; then # We are inside a tmux session
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        tmux switch-client -t "$session_name"
+    else
+        # Create a new detached session
+        tmux new-session -s "$session_name" -c "$repo_path" -d
+
+        # Rename window just for clarity (optional)
+        tmux rename-window -t "$session_name":1 'main'
+
+        # In top pane, start nvim
+        tmux send-keys -t "$session_name":1.1 'nvim' C-m
+
+        # Split bottom pane and keep it in shell
+        tmux split-window -v -t "$session_name":1 -c "$repo_path"
+
+        # Resize top pane to 80% height
+        tmux resize-pane -t "$session_name":1.1 -y "$(($(tput lines) * 80 / 100))"
+
+        # Switch to the new session
+        tmux switch-client -t "$session_name"
+    fi
+else # Not inside a tmux session, behave as before
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        tmux attach-session -t "$session_name"
+    else
+        # Create a new detached session
+        tmux new-session -s "$session_name" -c "$repo_path" -d
+
+        # Rename window just for clarity (optional)
+        tmux rename-window -t "$session_name":1 'main'
+
+        # In top pane, start nvim
+        tmux send-keys -t "$session_name":1.1 'nvim' C-m
+
+        # Split bottom pane and keep it in shell
+        tmux split-window -v -t "$session_name":1 -c "$repo_path"
+
+        # Resize top pane to 80% height
+        tmux resize-pane -t "$session_name":1.1 -y "$(($(tput lines) * 80 / 100))"
+
+        # Attach to the session
+        tmux attach-session -t "$session_name"
+    fi
+fi
+

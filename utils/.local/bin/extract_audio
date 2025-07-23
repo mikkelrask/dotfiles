@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Defaults
+input_ext=""
+output_ext=""
+output_dir="audio"
+bitrate="192k"
+
+print_usage() {
+  echo "Usage: $0 -i <input-extension> [-o <output-audio-extension>] [-b <bitrate>] [-d <output-dir>]"
+  echo
+  echo "Flags:"
+  echo "  -i <input-ext>     Input file extension (e.g. mkv, mp4)"
+  echo "  -o <output-ext>    Desired output audio format (e.g. m4a, flac, ogg, opus)"
+  echo "                     If omitted, audio is copied as-is using its original codec."
+  echo "  -b <bitrate>       Bitrate for encoding (default: 192k)"
+  echo "  -d <output-dir>    Output directory (default: ./audio)"
+  echo "  -h                 Show this help message"
+}
+
+# Maps output extension to ffmpeg encoder
+get_encoder_for_extension() {
+  case "$1" in
+    m4a) echo "aac" ;;
+    mp3) echo "libmp3lame" ;;
+    flac) echo "flac" ;;
+    ogg) echo "libvorbis" ;;
+    opus) echo "libopus" ;;
+    wav) echo "pcm_s16le" ;;
+    *) echo "$1" ;;  # fallback (not recommended)
+  esac
+}
+
+# Maps codec to default output extension when copying
+get_ext_for_codec() {
+  case "$1" in
+    aac) echo "m4a" ;;
+    mp3) echo "mp3" ;;
+    flac) echo "flac" ;;
+    vorbis) echo "ogg" ;;
+    opus) echo "opus" ;;
+    ac3) echo "ac3" ;;
+    pcm_s16le) echo "wav" ;;
+    *) echo "$1" ;;  # fallback
+  esac
+}
+
+# Parse CLI flags
+while getopts ":i:o:b:d:h" opt; do
+  case ${opt} in
+    i ) input_ext="$OPTARG" ;;
+    o ) output_ext="$OPTARG" ;;
+    b ) bitrate="$OPTARG" ;;
+    d ) output_dir="$OPTARG" ;;
+    h ) print_usage; exit 0 ;;
+    \? ) echo "Invalid option: -$OPTARG" >&2; print_usage; exit 1 ;;
+    : ) echo "Option -$OPTARG requires an argument." >&2; print_usage; exit 1 ;;
+  esac
+done
+
+if [[ -z "$input_ext" ]]; then
+  echo "❌ Error: input extension (-i) is required."
+  print_usage
+  exit 1
+fi
+
+mkdir -p "$output_dir"
+
+for file in *."$input_ext"; do
+  [ -e "$file" ] || continue
+  base="${file%.*}"
+
+  mapfile -t audio_codecs < <(ffprobe -v error -select_streams a -show_entries stream=codec_name -of csv=p=0 "$file")
+
+  for i in "${!audio_codecs[@]}"; do
+    codec="${audio_codecs[$i]}"
+
+    if [[ -n "$output_ext" ]]; then
+      # Transcode to desired codec
+      encoder=$(get_encoder_for_extension "$output_ext")
+      output="$output_dir/${base}_stream${i}.${output_ext}"
+      echo "🔁 Transcoding stream $i ($codec) → $output_ext ($encoder): $output"
+      ffmpeg -hide_banner -loglevel error -i "$file" -map 0:a:$i -c:a "$encoder" -b:a "$bitrate" "$output"
+    else
+      # Copy stream as-is
+      out_ext=$(get_ext_for_codec "$codec")
+      output="$output_dir/${base}_stream${i}.${out_ext}"
+      echo "🔊 Copying stream $i ($codec) → $out_ext: $output"
+      ffmpeg -hide_banner -loglevel error -i "$file" -map 0:a:$i -c:a copy "$output"
+    fi
+  done
+done
+
+echo "✅ Done! Audio files saved in: $output_dir/"
+
