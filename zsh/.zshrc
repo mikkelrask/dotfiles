@@ -17,10 +17,10 @@ while IFS= read -r file; do
   fi
 done < <(ls -A /home/mr/.config/zsh)
 
-# Source environment variables
-source "$HOME/.zshenv"
-
 # Set up fzf key bindings and fuzzy completion
 source <(fzf --zsh)
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+
+# Source environment variables
+source "$HOME/.zshenv"

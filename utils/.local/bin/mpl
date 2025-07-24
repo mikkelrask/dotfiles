@@ -1,0 +1,207 @@
+#!/usr/bin/env bash
+#This script does some nifty lyric stuff with mpd
+
+MPDDB="$HOME/.config/mpd/mpd.db"
+TEMPFILE="/tmp/mpl.tmp"
+LYRICDIR="$HOME/.config/mpd/lyrics"
+
+COLOR='yes'
+PAGER='bat'
+SCUR='0'
+SSPEC='0'
+DCUR='0'
+DSPEC='0'
+DALL='0'
+
+
+err() {
+  echo "$1"
+  exit 1
+}
+
+usage() {
+  echo "Usage: mpl [options] [arguments]"
+  echo
+  echo "Options"
+  echo
+  echo "  -d, --download - download lyrics (see below for examples)"
+  echo "  -s, --show     - show lyrics     (see below for examples)"
+  echo "  -h, --help     - display this"
+  echo
+  echo "Examples"
+  echo
+  echo "  mpl -s current"
+  echo "         shows lyrics of current song"
+  echo "  mpl -s ARTIST TITLE"
+  echo "         shows lyrics of specified song, not case sensitive" 
+  echo
+  echo "  mpl -d all"
+  echo "         download lyrics of all the songs in the mpd database"
+  echo "  mpl -d current"
+  echo "         download lyrics of current song"
+  echo "  mpl -d ARTIST TITLE"
+  echo "         download lyrics of specified song, not case sensitive"
+  exit
+}
+
+#Arg 1 - artist, Arg 2 - title
+lyricfileexists() {
+  filename="$(tr -d '/' <<<$1-$2).txt"
+  findoutput="$(find $LYRICDIR -iname "$filename")"
+
+  if [ -n "$findoutput" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+#Arg 1 - artist, Arg 2 - title
+download() {
+  #leoslyrics needs underscores, not spaces
+  artist="$(tr ' ' '_' <<<$1)"
+  title="$(tr ' ' '_' <<<$2)"
+  metaurl="http://api.leoslyrics.com/api_search.php?auth=mpl&artist=$artist&songtitle=$title"
+
+
+  #Download leoslyrics meta file, extract info, delete
+  wget -q "$metaurl" -O- | sed 's/<\/.*$//' > "$TEMPFILE"
+  realartist="$(grep '<name>' $TEMPFILE | cut -d '>' -f 2)"
+  realtitle="$(grep '<title>' $TEMPFILE | cut -d '>' -f 2)"
+  filename="$(tr -d '/' <<<$realartist-$realtitle).txt"
+  hid="$(grep 'exactMatch="true"' $TEMPFILE | cut -d '"' -f 4)"
+  rm -f "$TEMPFILE"
+
+  #No matches, means no $hid
+  if [ -z "$hid" ]; then
+    return 1
+  fi
+
+  #Download, do some formatting, and write lyric file
+  actualurl="http://api.leoslyrics.com/api_lyrics.php?auth=mpl&hid=$hid"
+  wget -q "$actualurl" -O- | grep -e "
+" -e "text>" | sed -e 's/^.*<text>//' -e 's/<\/text>//' -e 's/,
+//' -e 's/
+//' > "$LYRICDIR/$filename"
+  if [ -z "$(<"$filename")" ]; then
+    rm -f "$filename"
+    return 1
+  else
+    return 0
+  fi
+}
+
+#Parameter parsing
+[ "$#" -eq "0" ] && usage
+
+case "$1" in
+    '-d'|'--download')
+      case "$2" in
+        all)
+          DALL='1'
+          ;;
+        current)
+          ARTIST="$(mpc --format %artist% | head -n 1)"
+          TITLE="$(mpc --format %title% | head -n 1)"
+          DCUR='1'
+          ;;
+        '')  
+          err "No argument specified for option \`$1', see mpl --help."
+          ;;
+        *)
+          ARTIST="$2"
+          [ -z "$3" ] && err "No TITLE specified for option \`$1', see mpl --help."
+          TITLE="$3"
+          DSPEC='1'
+          ;;
+      esac
+      ;;
+    '-s'|'--show')
+      case "$2" in
+        current)
+          ARTIST="$(mpc --format %artist% | head -n 1)"
+          TITLE="$(mpc --format %title% | head -n 1)"
+          SCUR='1'
+          ;;
+        '')  
+          err "No argument specified for option \`$1', see mpl --help."
+          ;;
+        *)
+          ARTIST="$2"
+          [ -z "$3" ] && err "No TITLE specified for option \`$1', see mpl --help."
+          TITLE="$3"
+          SSPEC='1'
+          ;;
+      esac
+      ;;
+    '-h'|'--help')
+      usage
+      ;;
+    *)
+      err "Option \`$1' is not recognized, see mpl --help."
+      ;;
+esac
+
+#Configuration goodness
+[ -d "$LYRICDIR" ] || mkdir -p "$LYRICDIR"
+
+if [ "$COLOR" = "yes" ]; then
+  FAILCOLOR="\033[1;31m"
+  NORMAL="\033[1;0m"
+fi
+
+#Download all
+if [ "$DALL" -eq "1" ]; then
+  [ -f "$MPDDB" ] || err "No database found at $MPDDB."
+
+  #Fill array from mpd db
+  SAVEIFS="$IFS"
+  IFS=$'\n'
+  artists=( $(grep '^Artist: ' "$MPDDB" | cut -d : -f 2 | sed 's/^ //') )
+  titles=( $(grep '^Title: ' "$MPDDB" | cut -d : -f 2 | sed 's/^ //') )
+  TOTAL="${#artists[@]}"
+  IFS="$SAVEIFS"
+  
+  for ((i=0; i<$TOTAL ; i++)); do
+    if ! lyricfileexists "${artists[$i]}" "${titles[$i]}"; then
+      echo -n "${artists[$i]} - ${titles[$i]}..."
+      download "${artists[$i]}" "${titles[$i]}"
+      if [ "$?" -eq "0" ]; then
+        echo "success."
+      else
+        echo -e "${FAILCOLOR}failure.${NORMAL}"
+      fi 
+    fi
+  done
+  exit
+fi
+
+#Download current or specific
+if [ "$DCUR" -eq "1" -o "$DSPEC" -eq "1" ]; then
+  if lyricfileexists "$ARTIST" "$TITLE"; then
+    echo "Lyric file for \`$ARTIST - $TITLE' already exists."
+  else
+    echo -n "$ARTIST - $TITLE..."
+    download "$ARTIST" "$TITLE"
+    if [ "$?" -eq "0" ]; then
+      echo "success."
+    else
+      echo -e "${FAILCOLOR}failure.${NORMAL}"
+    fi 
+  fi
+  exit
+fi
+
+#Show current or specific
+if [ "$SCUR" -eq "1" -o "$SSPEC" -eq "1" ]; then
+  if ! lyricfileexists "$ARTIST" "$TITLE"; then
+    download "$ARTIST" "$TITLE"
+    [ "$?" -ne "0" ] && err "Could not fetch lyrics for \`$ARTIST - $TITLE'"
+  fi
+
+  filename="$(tr -d '/' <<<$ARTIST-$TITLE).txt"
+  echo
+  find $LYRICDIR -iname "$filename" -exec $PAGER {} \;
+  echo
+  exit
+fi

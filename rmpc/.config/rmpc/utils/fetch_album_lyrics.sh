@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: fetch_album_lyrics_simple.sh "/path/to/Artist/Album"
-# Example: fetch_album_lyrics_simple.sh "$HOME/Music/mpd/Anderson .Paak/Ventura"
-
 LRCLIB_API="https://lrclib.net/api/get"
 
 if [ $# -ne 1 ]; then
@@ -20,12 +17,8 @@ fi
 ARTIST="$(basename "$(dirname "$ALBUM_DIR")")"
 ALBUM="$(basename "$ALBUM_DIR")"
 
-# Try to fetch synced lyrics (only the [mm:ss.xx] lines) for a given title
-# Arguments:
-#   $1 = artist
-#   $2 = album
-#   $3 = title_to_try
-# Returns stdout = JSON .syncedLyrics (or "null"/empty)
+LYRICS_LINK_BASE="/home/mr/.config/mpd/lyrics"
+
 get_lyrics_for() {
     local artist="$1"
     local album="$2"
@@ -39,69 +32,96 @@ get_lyrics_for() {
         | jq -r '.syncedLyrics'
 }
 
-# Attempt a single fetch:
-#   1) Try with TITLE_RAW (may include “(feat ...)”)
-#   2) If that yields "" or "null", strip “(…)" and retry
-#   3) If still no lyrics, give up
-#   4) If we do get lyrics, write them verbatim to the .lrc file
-#
-# Arguments:
-#   $1 = ARTIST
-#   $2 = ALBUM
-#   $3 = TITLE_RAW
-#   $4 = OUTPUT_LRC_FILE (full path, e.g. /.../Song.lrc)
+prepend_lrc_tags() {
+    local artist="$1"
+    local album="$2"
+    local title="$3"
+    local lrc_file="$4"
+
+    if ! grep -q '^\[ar:' "$lrc_file"; then
+        local tmpfile
+        tmpfile="$(mktemp)"
+        {
+            echo "[ar:$artist]"
+            echo "[ti:$title]"
+            echo "[al:$album]"
+            cat "$lrc_file"
+        } > "$tmpfile"
+        mv "$tmpfile" "$lrc_file"
+        echo "→ Prepended metadata tags to: $lrc_file"
+    fi
+}
+
 fetch_for_plain() {
     local artist="$1"
     local album="$2"
     local title_try="$3"
     local out_lrc="$4"
 
-    # 1. First-pass lookup
     local lyrics
     lyrics="$(get_lyrics_for "$artist" "$album" "$title_try")"
 
-    # 2. If empty or "null", try stripping "(...)" from title
-    if [ -z "$lyrics" ] || [ "$lyrics" == "null" ]; then
+    if [[ "$title_try" == *"("* ]] && { [ -z "$lyrics" ] || [ "$lyrics" == "null" ]; }; then
         local stripped
         stripped="$(echo "$title_try" | sed -E 's/ *\([^)]*\)//g')"
-        if [ "$stripped" != "$title_try" ]; then
-            title_try="$stripped"
-            lyrics="$(get_lyrics_for "$artist" "$album" "$title_try")"
-        fi
+        lyrics="$(get_lyrics_for "$artist" "$album" "$stripped")"
+        title_try="$stripped"
     fi
 
-    # 3. If still empty/null → skip
     if [ -z "$lyrics" ] || [ "$lyrics" == "null" ]; then
         echo "✗ No lyrics for: \"$title_try\""
         return 1
     fi
 
-    # 4. Write only the synced‐lyrics lines (timestamps + text)
-    #    We drop any existing [ar:], [al:], [ti:] lines from the API payload,
-    #    but typically lrclib returns only timestamped lines anyway.
     echo "$lyrics" | sed -E '/^\[(ar|al|ti):/d' > "$out_lrc"
     echo "✔ Saved lyrics: $(basename "$out_lrc")"
     return 0
 }
 
-echo "▶ Fetching lyrics for all .mp3 in: $ALBUM_DIR"
+symlink_lyrics() {
+    local artist="$1"
+    local title_search="$2"  # ren titel uden nummer
+    local src_lrc="$3"
+
+    local dest_dir="${LYRICS_LINK_BASE}/${artist}"
+    local dest_lrc="${dest_dir}/${title_search}.lrc"
+
+    mkdir -p "$dest_dir"
+    if [ -e "$dest_lrc" ]; then
+        rm -f "$dest_lrc"
+    fi
+    ln -s "$src_lrc" "$dest_lrc"
+    echo "→ Symlink created: $dest_lrc → $src_lrc"
+}
+
+echo "▶ Fetching lyrics for all supported files in: $ALBUM_DIR"
 echo "  Artist: $ARTIST"
 echo "  Album:  $ALBUM"
 echo
 
 shopt -s nullglob
-for mp3 in "$ALBUM_DIR"/*.mp3; do
-    TITLE_RAW="$(basename "$mp3" .mp3)"
-    LRC_FILE="${mp3%.mp3}.lrc"
+for file in "$ALBUM_DIR"/*.{mp3,flac,m4a,opus}; do
+    [ -e "$file" ] || continue
+
+    BASENAME="$(basename "$file")"
+    TITLE_RAW="${BASENAME%.*}"  # fx "01. Track Name"
+    LRC_FILE="${file%.*}.lrc"
+
+    # Strip tracknummer fra søgning og til symlink-navn – men behold det i albummappen
+    TITLE_FOR_SEARCH="$(echo "$TITLE_RAW" | sed -E 's/^[0-9]+[._ -]+//')"
 
     if [ -f "$LRC_FILE" ]; then
         echo "– Skipping \"$TITLE_RAW\" (already have .lrc)"
+        prepend_lrc_tags "$ARTIST" "$ALBUM" "$TITLE_FOR_SEARCH" "$LRC_FILE"
+        symlink_lyrics "$ARTIST" "$TITLE_FOR_SEARCH" "$LRC_FILE"
         continue
     fi
 
-    if ! fetch_for_plain "$ARTIST" "$ALBUM" "$TITLE_RAW" "$LRC_FILE"; then
-        # a failure just prints the “No lyrics for…” message and moves on
-        continue
+    if fetch_for_plain "$ARTIST" "$ALBUM" "$TITLE_FOR_SEARCH" "$LRC_FILE"; then
+        prepend_lrc_tags "$ARTIST" "$ALBUM" "$TITLE_FOR_SEARCH" "$LRC_FILE"
+        symlink_lyrics "$ARTIST" "$TITLE_FOR_SEARCH" "$LRC_FILE"
+    else
+        echo "– No lyrics found for \"$TITLE_FOR_SEARCH\""
     fi
 done
 

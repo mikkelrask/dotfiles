@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# One shot yolo mode for Gemini
+# usage: gemido "task to perform in this current directory"
+
+PROMPT=$1
+
+gemini -y -p "$PROMPT"
