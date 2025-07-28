@@ -4,5 +4,5 @@ set -eou pipefail
 
 PLAYER=rmpc
 
-ghostty --config-file=/home/mr/.config/ghostty/borderless -e rmpc
+ghostty --title="rmpc" --config-file=/home/mr/.config/ghostty/borderless -e rmpc
 

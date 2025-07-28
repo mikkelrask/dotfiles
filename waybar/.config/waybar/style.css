@@ -2,7 +2,7 @@
     border: none;
     border-radius: 0;
     font-family: "FantasqueSansMono Nerd Font";
-    font-size: 13px;
+    font-size: 16px;
     min-height: 0;
 }
 
@@ -97,10 +97,9 @@ window#waybar {
 }
 
 #tray {
-}
   min-height: 0;
-  font-family: "Fantasque Sans Mono", "Font Awesome 6 Free Solid";
-  font-size: 18px;
+  font-family: "CaskaydiaCove NF", "Font Awesome 6 Free Solid";
+  font-size: 22px;
   font-weight: 600;
 }
 
