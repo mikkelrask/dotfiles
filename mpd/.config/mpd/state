@@ -3,7 +3,7 @@ audio_device_state:1:PipeWire Output
 audio_device_state:1:Visualizer feed
 state: pause
 current: 447
-time: 272.646
+time: 281.086
 random: 1
 repeat: 0
 single: 0
