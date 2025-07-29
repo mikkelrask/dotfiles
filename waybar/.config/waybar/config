@@ -1,10 +1,10 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 28,
+  "height": 32,
   "spacing": 4,
   "exclusive": true,
-  "gtk-layer-shell": true,
+  "gtk-layer-shell": false,
   "passthrough": false,
   "fixed-center": true,
   "modules-left": [
@@ -12,15 +12,14 @@
     "hyprland/window"
   ],
   "modules-center": [
-    "custom/mpd"
+    "custom/nowplaying"
   ],
   "modules-right": [
     "cpu",
-    "pulseaudio",
+    "memory",
     "clock",
     "clock#simpleclock",
     "tray",
-    "battery",
     "custom/power"
   ],
   "hyprland/workspaces": {
@@ -98,7 +97,13 @@
   },
   "custom/power": {
     "tooltip": false,
-    "on-click": "confirm 'Shutdown system? (yes/no)' ''",
+    "on-click": "hyprexit.sh",
     "format": "⏻ "
   },
+  "custom/nowplaying": {
+    "exec": "~/.config/waybar/scripts/nowplaying.sh",
+    "interval": 2,
+    "return-type": "json",
+    "tooltip": false
+  }
 }

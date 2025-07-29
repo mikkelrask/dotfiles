@@ -9,7 +9,7 @@ export PAGER=less
 export DOTFILES_HOMEDIR=$HOME/Documents/dotfiles
 export XDG_CONFIG_HOME=$HOME/.config
 export THEME=rose-pine
-export WALLPAPER=/home/mr/Pictures/rose-pine/rose_pine_maze.png
+export WALLPAPER="/mnt/data/appdata/motoko/wallpapers/Catppuccin Mocha/08. Catppuccin Mocha.png"
 export FLAKE="/home/mr/.nixos"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$HOME/.local/share/applications:$PATH"
 export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz

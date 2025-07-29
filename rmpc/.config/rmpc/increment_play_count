@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+rmpc song | /home/mr/dotfiles/utils/.local/bin/player-notification.sh 2>/dev/null
+
 sticker=$(rmpc sticker get "$FILE" "playCount" | jq -r '.value')
 if [ -z "$sticker" ]; then
     rmpc sticker set "$FILE" "playCount" "1"
@@ -7,4 +9,3 @@ else
     rmpc sticker set "$FILE" "playCount" "$((sticker + 1))"
 fi
 
-rmpc song | /home/mr/dotfiles/utils/.local/bin/player-notification.sh

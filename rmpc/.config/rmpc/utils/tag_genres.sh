@@ -14,7 +14,7 @@ FILES=()
 while IFS= read -r line; do
   FILES+=("$line")
 done < <(
-  for f in *.mp3; do
+  for f in *.{mp3,m4a,ogg,flac}; do
     track_num=$(eyeD3 "$f" 2>/dev/null | grep -i "^track:" | awk '{print $2}' | cut -d/ -f1)
     printf "%03d|%s\n" "${track_num:-999}" "$f"
   done | sort | cut -d'|' -f2

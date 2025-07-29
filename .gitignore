@@ -1,2 +1,5 @@
 tmux/.config/tmux/plugins/
 nvim/.config/nvim/.undo/
+mpd/.config/mpd/lyric/
+mpd/.config/mpd/lyric/*
+mpd/.config/mpd/lyrics/

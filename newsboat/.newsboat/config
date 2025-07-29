@@ -7,7 +7,7 @@ unbind-key c
 unbind-key ,
 
 player "mpv %u"
-browser linkhandler
+browser open
 # Feed settings
 prepopulate-query-feeds yes
 refresh-on-startup yes

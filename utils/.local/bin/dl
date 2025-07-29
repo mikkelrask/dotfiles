@@ -1,29 +1,9 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-music_dir="/pool/Music"
+music_dir="/mnt/pool/Music"
+yt_dlp_urls=("bandcamp.com" "youtube.com" "soundcloud.com")
 
-yt_dlp_urls=(
-  "*bandcamp.com*"
-  "*youtube.com*"
-  "*soundcloud.com*"
-)
-
-eyed3_check() {
-  if ! command -v eyeD3 &>/dev/null; then
-    notag=true
-  fi
-}
-
-
-set_title() {
-  basename "$1" "${1##*.}"
-}
-export -f set_title
-
-remove_id_inside_brackets() {
-  local title="$1"
-  echo "${title//\[[0-9]*\]/}"
-}
 dl() {
   local url="$1"
   local use_yt_dlp=false
@@ -40,73 +20,107 @@ dl() {
     echo "[INFO] Media link detected - downloading using yt-dlp"
     read -rp "Artist: " artist
     read -rp "Album: " album
-    if [ -d "$music_dir/${artist}/${album}" ]; then
-      echo "Album directory already exists."
-      read -rp "Do you want to overwrite it? (y/n): " overwrite
-      [ "$overwrite" != "y" ] && cd "$start_dir" && exit 0
-    elif [[ ! -d "$music_dir/${artist}/${album}" ]]; then
-      mkdir -pv "$music_dir/${artist}/${album}"
-    fi
-    cd "$music_dir/${artist}/${album}" || exit 1
     read -rp "Year: " year
     read -rp "URL to album art work (leave empty to skip): " cover_url
-    [ "$cover_url" ] && wget -cq --progress bar -O "$music_dir/${artist}/${album}/cover.jpg" "$cover_url"
-    echo "[INFO] Downloading ..."
-    if ! yt-dlp -x "$@" --audio-quality 0 --quiet --progress -o "$music_dir/${artist}/${album}/%(title)s.%(ext)s"; then
+
+    target_dir="$music_dir/${artist}/${album}"
+    mkdir -p "$target_dir"
+    cd "$target_dir" || exit 1
+
+    if [[ -n "$cover_url" ]]; then
+      wget -cq --progress bar -O "cover.jpg" "$cover_url"
+    fi
+
+    album_safe="${album//\'/\'\\\'\'}"
+
+    echo "[INFO] Downloading with yt-dlp..."
+
+    if ! yt-dlp \
+      --cookies "$HOME/.config/yt-dlp/www.youtube.com_cookies.txt" \
+      -x --audio-format mp3 --audio-quality 0 \
+      --add-metadata \
+      --metadata-from-title "%(artist)s - %(title)s" \
+      --ppa "EmbedMetadata:-metadata album='$album_safe' -metadata date=$year -metadata artist='$artist'" \
+      -o "%(playlist_index)02d - %(title)s.%(ext)s" \
+      "$url"; then
       echo "[ERROR] yt-dlp failed to download the file(s)."
-      cd "$start_dir" || exit 1
-      exit 1
+      cd "$start_dir" && exit 1
     fi
 
-    ## Tagging
-    [[ -z "$notag" ]] && exit 0
-
-    # Convert to mp3
-    echo "[INFO] Converteing opus media to mp3..."
-    convert.sh opus mp3 &>/dev/null || (echo "[ERROR] Something went wrong converting media files ..." && exit 1)
-    read -rp "Do you wish to clean up the source media files? (y/n) " clean
-    if [[ "$clean" == "y" ]]; then
-	echo "[INFO] Deleting *.opus ..."
-	rm ./*.opus
-    fi
-
-
-    # Find all supported files and tag them with eyeD3
-    echo "[INFO] Tagging media files ..."
-    ((number=1))
     for media in *.mp3; do
-      # Skip if no files match (glob fails)
-      [[ -e "$media" ]] || continue
-      
-      # Extract new title (strip extension, optional custom function can be used)
-      new_title="${media%.*}"
-      (( total_tracks=$(find ./*.mp3 | wc -l) ))
-      
-      # Apply tags using eyeD3
-      echo "[$number] $artist - $new_title, $album"
-      
-      if ! /usr/bin/eyeD3 --add-image="./cover.jpg:FRONT_COVER" \
-            -a "$artist" \
-            -A "$album" \
-            -b "$artist" \
-            -Y "$year" \
-            -t "$new_title" \
-            -n "$number" \
-            -N "$total_tracks" \
-            "$media" + &>/dev/null; then
-        echo "Error: eyeD3 failed to tag file: $media"
-        cd "$start_dir" && exit 1
+      echo "[INFO] Checking $media"
+
+      title_check=$(ffprobe -v error -show_entries format_tags=title -of default=noprint_wrappers=1:nokey=1 "$media")
+      album_check=$(ffprobe -v error -show_entries format_tags=album -of default=noprint_wrappers=1:nokey=1 "$media")
+
+      if [[ -z "$title_check" || -z "$album_check" ]]; then
+        echo "[INFO] Missing title or album, re-tagging full metadata..."
+
+        new_title="${media%.*}"
+        total_tracks=$(find . -maxdepth 1 -type f -iname "*.mp3" | wc -l)
+        track_num=$(echo "$media" | grep -oE '^[0-9]+' || echo 0)
+
+        tmp_output=$(mktemp --suffix=.mp3)
+
+        if [[ -f "cover.jpg" ]]; then
+          ffmpeg -y -i "$media" -i "cover.jpg" \
+            -map 0 -map 1 -c copy -id3v2_version 3 \
+            -metadata title="$new_title" \
+            -metadata album="$album" \
+            -metadata album_artist="$artist" \
+            -metadata date="$year" \
+            -metadata track="$track_num/$total_tracks" \
+            -disposition:v:0 attached_pic \
+            "$tmp_output" &>/dev/null
+        else
+          ffmpeg -y -i "$media" -c copy -id3v2_version 3 \
+            -metadata title="$new_title" \
+            -metadata album="$album" \
+            -metadata album_artist="$artist" \
+            -metadata date="$year" \
+            -metadata track="$track_num/$total_tracks" \
+            "$tmp_output" &>/dev/null
+        fi
+
+        if [[ -f "$tmp_output" ]]; then
+          mv "$tmp_output" "$media"
+          echo "[INFO] Re-tagging complete."
+        else
+          echo "[ERROR] ffmpeg tagging failed for $media"
+        fi
+      else
+        echo "[INFO] Title and album present, checking artist and cover..."
+
+        tmp_output=$(mktemp --suffix=.mp3)
+
+        if [[ -f "cover.jpg" ]]; then
+          ffmpeg -y -i "$media" -i "cover.jpg" \
+            -map 0 -map 1 -c copy -id3v2_version 3 \
+            -metadata album_artist="$artist" \
+            -metadata album_artist="$artist" \
+            -disposition:v:0 attached_pic \
+            "$tmp_output" &>/dev/null
+        else
+          ffmpeg -y -i "$media" -c copy -id3v2_version 3 \
+            -metadata album_artist="$artist" \
+            "$tmp_output" &>/dev/null
+        fi
+
+        if [[ -f "$tmp_output" ]]; then
+          mv "$tmp_output" "$media"
+          echo "[INFO] Artist (and cover) update done."
+        else
+          echo "[ERROR] ffmpeg artist update failed for $media"
+        fi
       fi
-      
-      ((number++))
     done
+    
 
     cd "$start_dir" && exit 0
   else
-    echo "[INFO] Downloading $1"
-    wget -cq --progress bar "$@"
+    echo "[INFO] Downloading $url"
+    wget -cq --progress bar "$url"
   fi
 }
 
-# Call the function with command line arguments
 dl "$@"
