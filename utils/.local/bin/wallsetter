@@ -1,20 +1,99 @@
 #!/usr/bin/env bash
-. "$HOME/.zshenv"
 
-$HOME/.local/bin/ifinstalled dmenu feh dunst 
-[ $? -ne 0 ] && exit 1
+WALLPAPER_DIR="/mnt/data/appdata/motoko/wallpapers"
+CACHE_DIR="$HOME/.cache/wallsetter"
+ZSHENV="$HOME/.zshenv"
+SHUFFLE_ICON_SRC="$HOME/.local/share/icons/hicolor/256x256/apps/random.png"
+SHUFFLE_ICON="$CACHE_DIR/shuffle_thumbnail.png"
+THUMBNAIL_WIDTH=250
+THUMBNAIL_HEIGHT=141
 
-WALLPAPERS=$(ls -R /home/mr/Pictures/wallpapers/*/*.{jpg,png})
+mkdir -p "$CACHE_DIR"
+cd "$WALLPAPER_DIR" || exit 1
 
-OPTION=$(echo "$WALLPAPERS" | dmenu -i -l 10 -fn 'FantasqueSansMono Nerd Font-12' -nb '#191724' -nf '#e0def4' -sb '#ebbcba' -sf '#191724')
+generate_thumbnail() {
+  echo "[info] generating thumbnails to .cache"
+  local src="$1"
+  local dest="$2"
+  magick "$src" -thumbnail "${THUMBNAIL_WIDTH}x${THUMBNAIL_HEIGHT}^" \
+    -gravity center -extent "${THUMBNAIL_WIDTH}x${THUMBNAIL_HEIGHT}" "$dest" &>/dev/null
+}
 
-if [ -z "$OPTION" ]; then 
-  exit 0
+# Generate shuffle icon thumbnail if missing
+if [[ ! -f "$SHUFFLE_ICON" ]]; then
+  magick -size "${THUMBNAIL_WIDTH}x${THUMBNAIL_HEIGHT}" xc:#1e1e2e \
+    \( "$SHUFFLE_ICON_SRC" -resize "80x80" \) \
+    -gravity center -composite "$SHUFFLE_ICON" &>/dev/null
 fi
-[ "$OPTION" == "random" ] && OPTION=$(echo "$WALLPAPERS" | shuf -n 1)
 
-feh --bg-fill "$OPTION"
-notify-send -a "$(hostname)" -i "/home/mr/.config/dunst/icons/wallsetter.svg" -c info -r 2000 "wallsetter" "$OPTION is set wallpaper"
+# Generate thumbnails mirroring directory structure
+find . -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) | while read -r file; do
+  thumb_path="$CACHE_DIR/$file"
+  thumb_dir=$(dirname "$thumb_path")
+  mkdir -p "$thumb_dir"
+  [[ ! -f "$thumb_path" || "$file" -nt "$thumb_path" ]] && generate_thumbnail "$file" "$thumb_path"
+done
 
-OPTION_WITH_PATH="$OPTION"
-sed -i "s|WALLPAPER=.*|WALLPAPER=$OPTION|g" "$HOME/.zshenv" || notify-send -c warning -i "$HOME/.local/bin/warn.png" -a "$(hostname)" "wallsetter" "Could not set $WALLPAPER variable. Wallpaper setting will not persist after reboot/relog"
+generate_menu() {
+  echo -en "img:$SHUFFLE_ICON\x00info:!Random Wallpaper\x1fRANDOM\n"
+  find "$CACHE_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) ! -name "$(basename "$SHUFFLE_ICON")" | while read -r thumb; do
+    # Get relative path inside cache dir
+    rel_thumb=${thumb#"$CACHE_DIR"/}
+    # Use same relative path inside wallpaper dir as the final wallpaper path
+    filename=$(basename "$rel_thumb")
+    echo -en "img:$thumb\x00info:$filename\x1f$rel_thumb\n"
+  done
+}
+
+CHOICE=$(generate_menu | wofi --show dmenu \
+  --cache-file /dev/null \
+  --define "image-size=${THUMBNAIL_WIDTH}x${THUMBNAIL_HEIGHT}" \
+  --columns 3 \
+  --allow-images \
+  --insensitive \
+  --sort-order=default \
+  --prompt "Set wallpaper" \
+  --conf ~/.config/wofi/wallpaper.conf \
+  --style ~/.config/wofi/wallsetter/wallsetter.css \
+)
+
+[[ -z "$CHOICE" ]] && exit 0
+EXTENSION=${CHOICE##*.}
+LOCAL_WALL="$CACHE_DIR/current_wallpaper.$EXTENSION"
+
+#SELECTED_RELPATH=$(echo -e "$CHOICE" | awk -F $'\x1f' '{print $2}')
+SELECTED_RELPATH=${CHOICE#img:}
+NEWPATH=${SELECTED_RELPATH#"$CACHE_DIR/"}
+
+
+if [[ "$CHOICE" == "random" ]]; then
+  WALL=$(find "$WALLPAPER_DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" \) | shuf -n 1)
+else
+  WALL="$WALLPAPER_DIR/$NEWPATH"
+fi
+
+[[ -f "$WALL" ]] || {
+  echo "[err] Wallpaper not found: $WALL"
+  notify-send "Wallsetter" "Wallpaper not found: $WALL"
+  exit 1
+}
+
+echo "[info] copying $WALL -> $LOCAL_WALL"
+if ! cp "$WALL" "$LOCAL_WALL"; then
+  echo "[err] could not copy $SELECTED_RELPATH to local storage. exiting"
+  exit 1
+fi
+
+echo "[info] setting \$WALLPAPER environment variable"
+sed -i "s|^WALLPAPER=.*|WALLPAPER='$LOCAL_WALL'|g" "$ZSHENV" || {
+  notify-send -u critical -a "wallsetter" "Failed to update WALLPAPER in $ZSHENV"
+  exit 1
+}
+export WALLPAPER="$LOCAL_WALL"
+
+echo "[info] Restarting hyprpaper"
+killall hyprpaper &>/dev/null
+eval hyprpaper &>/dev/null & disown
+
+notify-send -i "$WALL" "Wallpaper set" "$(basename "$WALL")"
+
