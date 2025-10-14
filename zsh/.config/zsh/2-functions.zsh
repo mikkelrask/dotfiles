@@ -11,7 +11,7 @@
 __prompt_to_bottom_line() {                                                                                                                                                  
 tput cup $LINES                                                                                                                                                            
 }                                                                                                                                                                            
-__prompt_to_bottom_line                                                                                                                                                      
+#__prompt_to_bottom_line                                                                                                                                                      
 
 __TMEX_LAUNCH () {                                                                                                                                                           
 ┊ cd ~/repos/dotfile-docs                                                                                                                                                    

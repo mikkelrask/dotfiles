@@ -13,7 +13,7 @@ alias mpv='mpv --no-audio-display'
 alias librewolf='MOZ_ENABLE_WAYLAND=1 MOZ_USE_XINPUT2=1 librewolf'
 #alias music="ncmpcpp -c ~/.config/ncmpcpp/turntable -b ~/.config/ncmpcpp/bindings -h 192.168.1.190"
 alias :q="exit"
-alias clear='clear && __prompt_to_bottom_line'
+alias clear='clear'
 alias c='clear'
 alias cat='bat'
 #alias config="$EDITOR $HOME/.config/i3/config"

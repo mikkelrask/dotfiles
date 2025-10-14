@@ -9,7 +9,7 @@ window-padding-x = 12
 window-padding-y = 12
 mouse-hide-while-typing = true
 #grapheme-width-method = legacy
-theme = "tokyonight"
+theme = "TokyoNight Night"
 
 
 #custom-shader=./ghostty-shaders/animated-gradient-shader.glsl
@@ -29,7 +29,7 @@ theme = "tokyonight"
 #custom-shader=./ghostty-shaders/sin-interference.glsl
 #custom-shader=./ghostty-shaders/smoke-and-ghost.glsl
 #custom-shader=./ghostty-shaders/sparks-from-fire.glsl
-#custom-shader=./ghostty-shaders/spotlight.glsl
+custom-shader=./ghostty-shaders/spotlight.glsl
 #custom-shader=./ghostty-shaders/starfield-colors.glsl
 #custom-shader=./ghostty-shaders/starfield.glsl
 #custom-shader=./ghostty-shaders/tft.glsl

@@ -24,3 +24,5 @@ source <(fzf --zsh)
 
 # Source environment variables
 source "$HOME/.zshenv"
+
+[ -f "$HOME/.bash_git" ] && source "$HOME/.bash_git"
