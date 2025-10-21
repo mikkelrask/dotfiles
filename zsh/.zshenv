@@ -10,6 +10,8 @@ export DOTFILES_HOMEDIR=$HOME/Documents/dotfiles
 export XDG_CONFIG_HOME=$HOME/.config
 export THEME=rose-pine
 export WALLPAPER=$(cat /home/mr/.local/share/setwall/wallpaper)
+export BACKUP_HOST="raske@delos"
+export BACKUP_DIR="$HOME/"
 export FLAKE="/home/mr/.nixos"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$HOME/.local/share/applications:$PATH"
 export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz

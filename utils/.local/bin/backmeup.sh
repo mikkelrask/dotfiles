@@ -4,14 +4,14 @@
 # Runs ON: ava
 # Syncs TO: delos
 #
-# Usage: backmeup [--dry-run]
+# Usage: backmeup.sh [--dry-run]
 
-# 1. Generate timestamp once for consistent naming
+# Generate timestamp once for consistent naming
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Configuration
-BACKUP_HOST="raske@delos"  # Backup server hostname
-SOURCE_PATH="/home/mr/"  # Local source path on THIS (prod) server
+BACKUP_HOST="$BACKUP_HOST"  # Set the variable in your env. if invoking manually
+SOURCE_PATH="$BACKUP_DIR"   # Set the variable in your env. if invoking manually
 BACKUP_PATH="/data/appdata/ava/home/mr/"  # Destination path on backup server
 BACKUP_VERSIONS_PATH="/data/appdata/ava/Backup/Versions/$TIMESTAMP"  # Versioned backups (on remote)
 LOG_DIR="/home/mr/.local/share/backmeup/"
@@ -26,13 +26,13 @@ log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
 }
 
-# 2. Check for dry-run flag
+# Check for dry-run flag
 DRY_RUN=false
 if [ "$1" = "--dry-run" ]; then
     DRY_RUN=true
 fi
 
-# 3. Check if backup host is reachable
+# Check if backup host is reachable
 BACKUP_HOST_NAME=$(echo "$BACKUP_HOST" | cut -d'@' -f2)
 if echo "$BACKUP_HOST" | grep -q '@'; then
     # Has user@host format
@@ -45,14 +45,6 @@ fi
 if ! ping -c 1 -W 2 "$PING_TARGET" >/dev/null 2>&1; then
     log "ERROR: Could not communicate with backup server: $BACKUP_HOST"
     log "ERROR: Please make sure the server is turned on and reachable"
-    exit 1
-fi
-
-# 4. Create backup version directory on remote server
-log "Creating version directory on backup server..."
-ssh "$BACKUP_HOST" "mkdir -pv '$BACKUP_VERSIONS_PATH'" 2>&1 | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-    log "ERROR: Could not create version directory on backup server"
     exit 1
 fi
 
