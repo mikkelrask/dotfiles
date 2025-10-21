@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Production NAS to Backup NAS sync script
 # Runs ON: ava
@@ -10,8 +10,8 @@
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Configuration
-BACKUP_HOST="$BACKUP_HOST"  # Set the variable in your env. if invoking manually
-SOURCE_PATH="$BACKUP_DIR"   # Set the variable in your env. if invoking manually
+BACKUP_HOST="raske@delos"  # Backup server hostname
+SOURCE_PATH="/home/mr/"  # Local source path on THIS (prod) server
 BACKUP_PATH="/data/appdata/ava/home/mr/"  # Destination path on backup server
 BACKUP_VERSIONS_PATH="/data/appdata/ava/Backup/Versions/$TIMESTAMP"  # Versioned backups (on remote)
 LOG_DIR="/home/mr/.local/share/backmeup/"
@@ -58,7 +58,7 @@ fi
 touch "$LOCK_FILE"
 
 # Trap to ensure lock file is removed on exit
-trap "rm -f $LOCK_FILE" EXIT
+trap 'rm -f $LOCK_FILE' EXIT
 
 log "=== Production to Backup Sync ==="
 if [ "$DRY_RUN" = true ]; then
