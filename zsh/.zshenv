@@ -9,7 +9,7 @@ export PAGER=less
 export DOTFILES_HOMEDIR=$HOME/Documents/dotfiles
 export XDG_CONFIG_HOME=$HOME/.config
 export THEME=rose-pine
-export WALLPAPER="/mnt/data/appdata/motoko/wallpapers/Catppuccin Mocha/08. Catppuccin Mocha.png"
+export WALLPAPER=$(cat /home/mr/.local/share/setwall/wallpaper)
 export FLAKE="/home/mr/.nixos"
 export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$HOME/.local/share/applications:$PATH"
 export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz
@@ -19,3 +19,4 @@ export NVM_DIR="$HOME/.config/nvm"
 #[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 export MOZ_ENABLE_WAYLAND=1 
 export MOZ_USE_XINPUT2=1
+# this has changed again again new change
