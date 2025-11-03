@@ -25,6 +25,7 @@ https://davidwalsh.name/feed "~David Walsch" "Tech"
 https://blog.codinghorror.com/rss/ "~Coding Horror" "Coding"
 https://levelup.gitconnected.com/feed "~Level Up Coding" "Coding"
 https://medium.com/feed/@johndanielraines "~John Raines" "Coding"
+https://www.pedaldrivenprogramming.com/feed/ "~Austin Riba" "Coding"
 
 # Youtubers
 https://www.youtube.com/feeds/videos.xml?channel_id=UCm6yD26HlafzqNlYaK7uEaA "~Xisuma Says, Youtube" "Youtube"
@@ -46,3 +47,6 @@ https://www.spreaker.com/show/4286413/episodes/feed "~Elektronista, Podcast" "Po
 
 #ME
 https://mikkelrask.github.io/rss.xml "~mikkelrask.github.io" "Blog"
+
+# test
+https://rss.knaben.org/fitgirl/4001000//thepiratebay|yts|eztv "~firgirl game releases" "Gaming"

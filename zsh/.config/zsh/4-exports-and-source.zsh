@@ -28,6 +28,6 @@ if [ -f "$HOME/.fzf-keybinds.zsh" ]; then
   source "$HOME/.fzf-keybinds.zsh"
 fi
 
-if [ -d "$HOME/.config/hellwal/" ]; then
-  source "$HOME/.config/hellwal/oterminal.sh"
-fi
+#if [ -d "$HOME/.config/hellwal/" ]; then
+#  source "$HOME/.config/hellwal/oterminal.sh"
+#fi

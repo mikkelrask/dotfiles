@@ -105,6 +105,7 @@ rsync -avhn \
     --exclude 'Thumbs.db' \
     --exclude '.Trash-*' \
     --exclude '@eaDir/' \
+    --exclude 'Games/' \
     "$SOURCE_PATH" \
     "$BACKUP_HOST:$BACKUP_PATH" \
     2>&1 | tee -a "$LOG_FILE"
@@ -161,6 +162,7 @@ rsync -avh \
     --exclude 'Thumbs.db' \
     --exclude '.Trash-*' \
     --exclude '@eaDir/' \
+    --exclude 'Games/' \
     "$SOURCE_PATH" \
     "$BACKUP_HOST:$BACKUP_PATH" \
     2>&1 | tee -a "$LOG_FILE"

@@ -25,6 +25,7 @@ alias clear='clear && __prompt_to_bottom_line'
 alias config="$(which updater)"
 alias e="exit"
 alias pip3="pip"
+alias lf="lyrics-fetch"
 alias so="source"
 alias mkdir="mkdir -pv"
 alias cd="cdls"
