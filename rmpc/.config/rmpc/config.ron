@@ -2,17 +2,16 @@
 #![enable(unwrap_newtypes)]
 #![enable(unwrap_variant_newtypes)]
 (
-    address: "localhost:6600",
     cache_dir: Some("/tmp/rmpc/cache"),
     lyrics_dir: Some("/home/mr/.config/mpd/lyrics"),
     password: None,
-    theme: "nord",
+    theme: "bright",
 
     on_song_change: ["/home/mr/.config/rmpc/increment_play_count"], 
     volume_step: 2,
-    max_fps: 30,
-    scrolloff: 1,
-    wrap_navigation: false,
+    max_fps: 60,
+    scrolloff: 0,
+    wrap_navigation: true,
     enable_mouse: true,
     status_update_interval_ms: 1000,
     select_current_song_on_change: false,
@@ -27,9 +26,9 @@
     keybinds: (
         global: {
             ":":       CommandMode,
-            ",":       VolumeDown,
+            "+":       VolumeDown,
             "s":       Stop,
-            ".":       VolumeUp,
+            "-":       VolumeUp,
             "<Tab>":   NextTab,
             "<S-Tab>": PreviousTab,
             "1":       SwitchToTab("Queue"),
@@ -163,7 +162,7 @@
         framerate: 60, // default 60
         autosens: true, // default true
         sensitivity: 100, // default 100
-        lower_cutoff_freq: 50, // not passed to cava if not provided
+        lower_cutoff_freq: 20, // not passed to cava if not provided
         higher_cutoff_freq: 10000, // not passed to cava if not provided
         input: (
             method: Fifo,
@@ -175,7 +174,7 @@
         smoothing: (
             noise_reduction: 77, // default 77
             monstercat: false, // default false
-            waves: false, // default false
+            waves: true, // default false
         ),
         eq: []
     ),
