@@ -1,6 +1,6 @@
-#define WALLPAPER "/data/appdata/motoko/wallpapers/Edge Runner/03. Edge Runner.jpg"
+#define WALLPAPER "/data/appdata/motoko/wallpapers/Abyssal Wave/06. Abyssal Wave.png"
 
-static const float rootcolor[]             = COLOR(0x09040eff);
-static const float bordercolor[]           = COLOR(0x7e77acff);
-static const float focuscolor[]            = COLOR(0x7e77acff);
-static const float urgentcolor[]           = COLOR(0x404070ff);
+static const float rootcolor[]             = COLOR(0x040e13ff);
+static const float bordercolor[]           = COLOR(0x52626fff);
+static const float focuscolor[]            = COLOR(0x52626fff);
+static const float urgentcolor[]           = COLOR(0x272a40ff);
