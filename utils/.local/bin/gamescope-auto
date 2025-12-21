@@ -1,0 +1,12 @@
+#!/bin/bash
+# Save as ~/.local/bin/gamescope-auto or similar
+
+# Check if external display is connected
+# sleep 5
+if xrandr | grep -q "HDMI-A-1 connected"; then
+    # TV is connected, use HDMI
+    exec gamescope -O HDMI-A-1 -W 1920 -H 1080 -e -f -- steam -tenfoot -gamepadui
+else
+    # Fall back to laptop screen
+    exec gamescope -O eDP-1 -W 1920 -H 1200 -e -f -- steam -tenfoot -gamepadui
+fi
