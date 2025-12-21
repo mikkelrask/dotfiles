@@ -1,0 +1,7 @@
+[[opener.bulk-rename]]
+run   = 'hx "$@"'
+block = true
+
+[[open.prepend_rules]]
+name = "bulk-rename.txt"
+use  = "bulk-rename"
