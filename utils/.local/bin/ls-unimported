@@ -1,0 +1,16 @@
+#!/bin/bash
+
+MUSIC_DIR="/pool/Music"
+
+# Find alle mapper med mediefiler (håndter quotes korrekt)
+find "$MUSIC_DIR" -type f \( -name "*.flac" -o -name "*.mp3" -o -name "*.m4a" -o -name "*.opus" \) -print0 | \
+  xargs -0 -n1 dirname | sort -u > /tmp/all_album_dirs.txt
+
+# Find alle importerede album paths fra beets
+beet ls -a -f '$path' | sort -u > /tmp/imported_album_dirs.txt
+
+# Sammenlign
+comm -23 /tmp/all_album_dirs.txt /tmp/imported_album_dirs.txt
+
+# Cleanup
+rm /tmp/all_album_dirs.txt /tmp/imported_album_dirs.txt
