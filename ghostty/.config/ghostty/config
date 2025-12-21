@@ -9,7 +9,7 @@ window-padding-x = 12
 window-padding-y = 12
 mouse-hide-while-typing = true
 #grapheme-width-method = legacy
-theme = "tokyonight"
+theme = "TokyoNight"
 
 
 #custom-shader=./ghostty-shaders/animated-gradient-shader.glsl
