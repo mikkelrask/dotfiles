@@ -79,3 +79,5 @@ alias dsbul="docker compose down --volume && docker compose build --no-cache && 
 alias dsbul="docker compose down --volumes && docker compose build --no-cache && docker compose up -d && docker compose logs -f"
 alias chmox=chmod
 alias lzg=lazygit
+
+alias rmdir=rmrf
