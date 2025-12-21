@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-music_dir="/mnt/pool/Music"
+music_dir="/pool/Music"
 notification_id_file="/tmp/music_notification_id"
 
 # Read JSON from stdin
