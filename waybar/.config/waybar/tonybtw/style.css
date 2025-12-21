@@ -1,0 +1,128 @@
+@define-color bg    #101116; 
+@define-color fg    #e41951; 
+@define-color blk   #01dc84; 
+@define-color red   #ff0051; 
+@define-color grn   #60fa68; 
+@define-color ylw   #faf945; 
+@define-color blu   #6871ff; 
+@define-color mag   #c930c7; 
+@define-color cyn   #00c5c7; 
+@define-color brblk #59516a; 
+@define-color white #c7c7c7; 
+
+* {
+    font-family: "IosevkaTerm NFP", monospace;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+window#waybar {
+    background-color: @bg;
+    color: @ylw;
+}
+
+#window {
+  color: @red;
+}
+
+#custom-notification {
+  background-color: @bg;
+}
+
+#tray {
+  background-color: @bg;
+}
+
+#workspaces, 
+#window,
+#battery,
+#clock,
+#network,
+#custom-sep{
+  background-color: @bg;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    color: @blu;
+    background: transparent;
+    border-bottom: 3px solid @bg;
+}
+#workspaces button.active {
+    color: @fg;
+    border-bottom: 3px solid @fg;
+}
+#workspaces button.hidden {
+    color: @ylw;
+}
+#workspaces button.hidden.active {
+    color: @blu;
+    border-bottom: 3px solid @mag;
+}
+
+#workspaces button.urgent {
+    background-color: @red;
+}
+
+button:hover {
+    background: inherit;
+    box-shadow: inset 0 -3px #ffffff;
+}
+
+#clock,
+#custom-sep,
+#battery,
+#cpu,
+#memory,
+#disk,
+#network,
+#tray {
+    padding: 0 8px;
+    color: @white;
+}
+
+#custom-sep {
+    color: @brblk;
+}
+
+#clock {
+    color: @cyn;
+    border-bottom: 4px solid @cyn;
+}
+
+#battery {
+    color: @blu;
+    border-bottom: 4px solid @blu;
+}
+
+#disk {
+    color: @ylw;
+    border-bottom: 4px solid @ylw;
+}
+
+#memory {
+    color: @mag;
+    border-bottom: 4px solid @mag;
+}
+
+#cpu {
+    color: @grn;
+    border-bottom: 4px solid @grn;
+}
+
+#network {
+    color: @grn;
+    border-bottom: 4px solid @grn;
+}
+
+#network.disconnected {
+    background-color: @red;
+}
+
+#tray {
+    background-color: @bg;
+    color: @grn;
+    border-bottom: 4px solid @grn;
+    margin-right:10px;
+}
+

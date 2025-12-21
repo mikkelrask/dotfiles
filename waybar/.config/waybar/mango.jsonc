@@ -73,21 +73,20 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "Bat: {capacity}% {icon} {time}",
-        "format-plugged": "{capacity}% ",
-        "format-alt": "Bat {capacity}%",
+        "format": "{capacity}% {icon} {time}",
+        "format-plugged": "󰂄 {capacity}%",
+        "format-alt": "󱊣 {capacity}%",
         "format-time": "{H}:{M}",
-        "format-icons": ["", "", "", "", ""]
+        "format-icons": ["󱉝", "󰂎", "󱊡", "󱊢", "󱊣"]
     },
     "network": {
-        "format-wifi": " {essid} ({signalStrength}%)",
+        "format-wifi": " {essid}",
         "format-ethernet": "{ifname}: {ipaddr}/{cidr} ",
         "format-linked": "{ifname} (No IP) ",
         "format": "",
         "format-disconnected": "",
         "format-alt": "{ifname}: {ipaddr}/{cidr}",
-        "on-click": "ghostty --config-file=.config/ghostty/borderless -e nmtui",
-        "on-click-right": "wl-copy $(ip address show up scope global | grep inet6 | head -n1 | cut -d/ -f 1 | tr -d [:space:] | cut -c6-)",
+        "on-click-right": "ghostty  --title='nm' --config-file=.config/ghostty/borderless -e impala",
         "tooltip-format": " {bandwidthUpBits}  {bandwidthDownBits}\n{ifname}\n{ipaddr}/{cidr}\n",
         "tooltip-format-wifi": " {essid} {frequency}MHz\nStrength: {signaldBm}dBm ({signalStrength}%)\nIP: {ipaddr}/{cidr}\n {bandwidthUpBits}  {bandwidthDownBits}",
         "interval": 10
@@ -102,6 +101,7 @@
       "on-click": "activate",
       "sort-by-id": true,
       "format-icons": {
+        /*
         "1": "",
         "2": " ",
         "3": " 󰭹 ",
@@ -111,7 +111,8 @@
         "7": " 󱎓 ",
         "8": "  ",
         "9": "  "
-   /*     "1": "一",
+        */
+        "1": "一",
         "2": "二",
         "3": "三",
         "4": "四",
@@ -120,7 +121,7 @@
         "7": "七",
         "8": "八",
         "9": "九",
-        "10": "十"*/
+        "10": "十"
         }
     },
     "mpd": {

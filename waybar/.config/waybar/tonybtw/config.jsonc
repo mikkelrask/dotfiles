@@ -1,0 +1,102 @@
+{
+  "modules-left": [
+    "ext/workspaces",
+    "custom/sep",
+    "dwl/window#layout",
+  ],
+  "modules-center": [
+    "dwl/window#title"
+  ],
+  "modules-right": [
+    "custom/sep",
+    "network",
+    "custom/sep",
+    "clock",
+    "custom/sep",
+    "battery",
+    "custom/sep",
+    "tray",
+    "custom/notification"
+  ],
+
+  "clock": {
+    "format-alt": " {:%Y-%m-%d}"
+  },
+  "cpu": {
+    "format": "CPU: {usage}%",
+    "tooltip": false
+  },
+  "memory": {
+    "format": "Mem: {used}GiB"
+  },
+  "disk": {
+    "interval": 60,
+    "path": "/",
+    "format": "Disk: {free}"
+  },
+  "battery": {
+    "states": {
+      "good": 95,
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "Bat: {capacity}% {icon} {time}",
+    "format-plugged": "{capacity}% ",
+    "format-alt": "Bat {capacity}%",
+    "format-time": "{H}:{M}",
+    "format-icons": ["", "", "", "", ""]
+  },
+  "network": {
+    "format": " ",
+    "format-disconnected": "󰖪 "
+  },
+  "ext/workspaces": {
+    "format": "{icon}",
+    "ignore-hidden": false,
+    "on-click": "activate",
+    "format-icons":{
+      "1": "",
+      "2": "",
+      "3": "󰭹",
+      "4": "󰧮",
+      "5": "",
+      "6": "",
+      "7": "",
+      "8": "",
+      "9": ""
+    }
+  },
+  "custom/notification": {
+    "tooltip": true,
+    "format": "<span size='16pt'>{icon}</span>",
+    "format-icons": {
+      "notification": "󱅫",
+      "none": "󰂜",
+      "dnd-notification": "󰂠",
+      "dnd-none": "󰪓",
+      "inhibited-notification": "󰂛",
+      "inhibited-none": "󰪑",
+      "dnd-inhibited-notification": "󰂛",
+      "dnd-inhibited-none": "󰪑"
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+  "dwl/tags": {
+    "num-tags": 9
+  },
+  "dwl/window#layout": {
+    "format": "[{layout}]"
+  },
+  "dwl/window#title": {
+    "format": "{title}"
+  },
+  "custom/sep": {
+    "format": "|",
+    "interval": 0
+  }
+}
