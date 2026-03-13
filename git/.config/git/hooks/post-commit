@@ -9,4 +9,4 @@ mkdir -p "$(dirname "$NOTE")"
 
 echo ""
 echo "### $(date +%H:%M) "$REPO":  " >> "$NOTE"
-echo '$git commit -m "$MSG"' >> "$NOTE"
+echo "\$ git commit -m \"$MSG\"" >> "$NOTE"
