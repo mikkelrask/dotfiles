@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 REPO=$(basename "$(git rev-parse --show-toplevel)")
-MSG=$(git log -1 --pretty=%s)
+MSG=$(git log -1 --pretty=%B)
 
 NOTE="$HOME/.brain/diary/$(date +%Y/%m/%Y-%m-%d).md"
 
@@ -9,4 +9,8 @@ mkdir -p "$(dirname "$NOTE")"
 
 echo ""
 echo "### $(date +%H:%M):  " >> "$NOTE"
-echo "Commit: ($REPO) $MSG" >> "$NOTE"
+
+# wrap multi-line commit in a fenced code block
+echo '```' >> "$NOTE"
+echo "($REPO) $MSG" >> "$NOTE"
+echo '```' >> "$NOTE"
