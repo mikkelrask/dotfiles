@@ -92,7 +92,7 @@
 
 [alias]
     diary = "!f() { \
-        NOTE=\"$HOME/.brain/diary/$(date +%Y/%m/%Y-%m-%d).md\"; \
+        NOTE=\"$HOME/.brain/diary/$(date +%Y)/$(date +%m)/$(date +%Y/%m/%Y-%m-%d).md\"; \
         mkdir -p \"$(dirname \"$NOTE\")\"; \
         echo \"$(date +%H:%M) commit: $1\" >> \"$NOTE\"; \
     }; f"
