@@ -7,6 +7,6 @@ NOTE="$HOME/.brain/diary/$(date +%Y/%m/%Y-%m-%d).md"
 
 mkdir -p "$(dirname "$NOTE")"
 
-ehco ""
-echo "$(date +%H:%M):  " >> "$NOTE"
-echo "[$REPO] Commit: $MSG" >> "$NOTE"
+echo ""
+echo "### $(date +%H:%M):  " >> "$NOTE"
+echo "Commit: ($REPO) $MSG" >> "$NOTE"
