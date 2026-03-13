@@ -8,9 +8,5 @@ NOTE="$HOME/.brain/diary/$(date +%Y/%m/%Y-%m-%d).md"
 mkdir -p "$(dirname "$NOTE")"
 
 echo ""
-echo "### $(date +%H:%M):  " >> "$NOTE"
-
-# wrap multi-line commit in a fenced code block
-echo '```' >> "$NOTE"
-echo "($REPO) $MSG" >> "$NOTE"
-echo '```' >> "$NOTE"
+echo "### $(date +%H:%M) "$REPO":  " >> "$NOTE"
+echo '$git commit -m "$MSG"' >> "$NOTE"
