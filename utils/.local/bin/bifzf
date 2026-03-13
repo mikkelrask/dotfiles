@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Capture selections into an array
+mapfile -t dirs < <(find . -maxdepth 3 -type d | \
+  fzf --multi \
+      --height=80% \
+      --border \
+      --prompt="Select dirs to import > " \
+      --preview='ls -lah {}' \
+      --preview-window=right:50%)
+
+# Loop through array - no pipes or redirects to steal stdin
+for dir in "${dirs[@]}"; do
+  if [[ -n "$dir" ]]; then
+    echo "=== Importing: $dir ==="
+    beet import -i -p "$dir"
+  fi
+done

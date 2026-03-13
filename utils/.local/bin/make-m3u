@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DEFAULT_DIR="/pool/Music"
+
+# --- Argument parsing ---
+# Mulige måder folk kunne køre det på:
+#   make-m3u.sh
+#   make-m3u.sh all
+#   make-m3u.sh lossless
+#   make-m3u.sh /path
+#   make-m3u.sh /path all
+#   make-m3u.sh /path lossless
+
+if [[ $# -eq 0 ]]; then
+    MUSIC_DIR="$DEFAULT_DIR"
+    MODE="all"
+elif [[ $# -eq 1 ]]; then
+    if [[ "$1" == "all" || "$1" == "lossless" ]]; then
+        MUSIC_DIR="$DEFAULT_DIR"
+        MODE="$1"
+    else
+        MUSIC_DIR="$1"
+        MODE="all"
+    fi
+elif [[ $# -eq 2 ]]; then
+    MUSIC_DIR="$1"
+    MODE="$2"
+else
+    echo "For mange argumenter. Brug:"
+    echo "  make-m3u.sh [music_dir] [all|lossless]"
+    exit 1
+fi
+
+# --- Mode ---
+case "$MODE" in
+  all)
+    OUTPUT_FILE="${MUSIC_DIR}/all-music.m3u"
+    EXTENSIONS=( "*.mp3" "*.m4a" "*.opus" "*.flac" "*.alac" "*.wav" "*.aac" )
+    ;;
+  lossless)
+    OUTPUT_FILE="${MUSIC_DIR}/all-music-lossless.m3u"
+    EXTENSIONS=( "*.flac" "*.alac" "*.wav" "*.aiff" )
+    ;;
+  *)
+    echo "Ukendt mode: $MODE"
+    echo "Brug 'all' eller 'lossless'"
+    exit 1
+    ;;
+esac
+
+# --- Build find-expression ---
+FIND_EXPR=()
+for ext in "${EXTENSIONS[@]}"; do
+  FIND_EXPR+=( -iname "$ext" -o )
+done
+unset 'FIND_EXPR[-1]'
+
+find "$MUSIC_DIR" -type f \( "${FIND_EXPR[@]}" \) \
+  | sort > "$OUTPUT_FILE"
+
+echo "Playlist genereret: $OUTPUT_FILE"
