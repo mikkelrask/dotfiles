@@ -1,0 +1,4 @@
+[[manager.prepend_keymap]]
+on   = [ "W" ]
+run  = 'shell "~/.local/bin/set-wallpaper \"$@\""'
+desc = "Set wallpaper from selected image"

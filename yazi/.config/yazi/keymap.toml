@@ -1,0 +1,9 @@
+[[mgr.prepend_keymap]]
+on   = [ "W" ]
+run  = 'shell "~/.local/bin/set-wallpaper \"$@\""'
+desc = "Set wallpaper from selected image"
+
+[[mgr.prepend_keymap]]
+on   = [ "B" ]
+run  = 'shell --block --confirm "beet import -i \"$@\""'
+desc = "Import selected files/folders to beets library"
