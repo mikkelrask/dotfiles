@@ -1,0 +1,18 @@
+[[mgr.prepend_keymap]]
+on   = [ "B", "i" ]
+run  = 'shell --block --confirm "beet import -i \"$@\""'
+desc = "Import selected files/folders to beets library"
+
+[[mgr.prepend_keymap]]
+on   = [ "B", "r" ]
+run  = 'shell --block --confirm "beet import -L \"$@\""'
+desc = "Reimport selected files/folders to beets library"
+
+[[mgr.prepend_keymap]]
+on   = [ "B", "e" ]
+run  = 'shell --block --confirm -- beet edit -a --all album:"$(basename %h)"'
+desc = "Edit beets album tags in your editor"
+
+[[mgr.prepend_keymap]]
+on   = [ "B", "l" ]
+run  = 'shell --block --confirm "lyrics-fetch \"$@\""'

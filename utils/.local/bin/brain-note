@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+ghostty -e /home/mr/.local/bin/brain note
