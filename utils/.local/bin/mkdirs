@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ $# -ne 2 ]]; then
+  echo "mkdirs creates directories for production days, and assumes it follows weekdays only, and doesn't consider any off days."
+  echo "Usage: $0 START_DATE(YYYY-MM-DD) NUMBER_OF_DAYS"
+  exit 1
+fi
+
+START_DATE="$1"
+TOTAL_DAYS="$2"
+
+# Detect OS and set date command
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS - use gdate
+  if ! command -v gdate >/dev/null 2>&1; then
+    echo "Error: GNU date (gdate) is required on macOS."
+    echo "Install with: brew install coreutils"
+    exit 1
+  fi
+  DATE_CMD="gdate"
+else
+  # Linux - use date
+  DATE_CMD="date"
+fi
+
+[[ "$TOTAL_DAYS" =~ ^[0-9]+$ ]] || {
+  echo "NUMBER_OF_DAYS must be a positive integer"
+  exit 1
+}
+
+$DATE_CMD -d "$START_DATE" >/dev/null 2>&1 || {
+  echo "Invalid start date: $START_DATE"
+  exit 1
+}
+
+current_date="$START_DATE"
+day=1
+
+while [[ $day -le $TOTAL_DAYS ]]; do
+  weekday=$($DATE_CMD -d "$current_date" +%u)
+
+  if [[ $weekday -le 5 ]]; then
+    day_padded=$(printf "%02d" "$day")
+    yymmdd=$($DATE_CMD -d "$current_date" +%y%m%d)
+    dirname="Dag${day_padded}_${yymmdd}"
+
+    mkdir -p "$dirname"
+    echo "Created $dirname"
+
+    ((day++))
+  fi
+
+  current_date=$($DATE_CMD -d "$current_date +1 day" +%F)
+done
