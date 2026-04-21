@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SRC="${1:-}"
+
+if [[ -z "$SRC" ]]; then
+  echo "No file provided" >&2
+  exit 1
+fi
+
+# Resolve symlinks & relative paths
+SRC="$(realpath "$SRC")"
+
+# Very light image check (fast, good enough)
+MIME="$(file --mime-type -b "$SRC")"
+if [[ "$MIME" != image/* ]]; then
+  echo "Not an image: $SRC" >&2
+  exit 1
+fi
+
+DEST="$HOME/.cache/wallpaper/current"
+
+mkdir -p "$(dirname "$DEST")"
+cp -f "$SRC" "$DEST"
+
+# Kill existing swaybg instances (quietly)
+pkill -x swaybg || true
+
+# Relaunch swaybg
+nohup swaybg \
+  --mode fill \
+  --image "$DEST" \
+  >/dev/null 2>&1 &
+
+disown 
+
+[[ $? != 0 ]] && command -v notify-send >/dev/null && \
+  notify-send "Error setting wallpaper" "Could not change to the selected wallpaper: $(basename "$SRC")" && exit 1
+
+command -v notify-send >/dev/null && \
+  notify-send "Wallpaper updated" "$(basename "$SRC")" 

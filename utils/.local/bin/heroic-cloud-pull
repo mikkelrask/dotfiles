@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# PULL
+# heroic-cloud-hook.sh
+cloud-save.sh pull "$HEROIC_LOCAL_SAVE" "$HEROIC_CLOUD_SAVE"
