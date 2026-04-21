@@ -7,4 +7,11 @@ mpd/.config/mpd/database
 mpd/.config/mpd/sticker.sql
 utils/.config/yt-dlp/www.youtube.com_cookies.txt
 utils/.config/yt-dlp
-
+utils/.local/bin/Feishin-linux-arm64.AppImage
+utils/.local/bin/Feishin-linux-x86_64.AppImage
+utils/.local/bin/UAC-Launch-Control-0.2.0.AppImage
+utils/.local/bin/icalendar
+utils/.local/bin/luma
+utils/.local/bin/mdread
+utils/.local/bin/uaclaunchcontrol-electron-0.0.2.AppImage
+utils/.local/bin/uaclaunchcontrol-electron-1.0.0.AppImage
