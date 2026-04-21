@@ -2,24 +2,29 @@
   "layer": "top",
   "position": "top",
   "height": 32,
-  "spacing": 4,
+  "spacing": 3,
   "exclusive": true,
   "gtk-layer-shell": false,
   "passthrough": false,
   "fixed-center": true,
   "modules-left": [
-    "hyprland/workspaces",
-    "hyprland/window"
+    "custom/logo",
+    "ext/workspaces",
+    "custom/sep",
+    "dwl/window#title",
   ],
   "modules-center": [
     "custom/nowplaying"
   ],
   "modules-right": [
-    "cpu",
-    "memory",
-    "clock",
-    "clock#simpleclock",
+    "network",
+    "custom/sep",
+    "pulseaudio",
+    "custom/sep",
+    "battery",
+    "custom/sep",
     "tray",
+    "clock",
     "custom/power"
   ],
   "hyprland/workspaces": {
@@ -30,7 +35,7 @@
       "3": " 󰭹 ",
       "4": " 󰈙 ",
       "5": "  ",
-      "6": " 󰧨 ",
+      "6": "󰧨 ",
       "7": " 󱎓 ",
       "8": "   ",
       "9": "   "
@@ -61,6 +66,36 @@
     "format": "  {:L%a %d %b}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
   },
+  "ext/workspaces": {
+    "format": "{icon}",
+    "ignore-hidden": true,
+    "on-click": "activate",
+    "sort-by-id": true,
+    "format-icons": {
+      
+      "1": "",
+      "2": " ",
+      "3": " 󰭹 ",
+      "4": " 󰈙 ",
+      "5": "  ",
+      "6": " 󰧨 ",
+      "7": " 󱎓 ",
+      "8": "  ",
+      "9": "  "
+     /* 
+      "1": "一",
+      "2": "二",
+      "3": "三",
+      "4": "四",
+      "5": "五",
+      "6": "六",
+      "7": "七",
+      "8": "八",
+      "9": "九",
+      "10": "十"
+      */
+      }
+  },
   "cpu": {
     "format": "  {usage}%",
     "tooltip": true,
@@ -88,7 +123,8 @@
     "on-click": "pavucontrol"
   },
   "custom/logo": {
-    "format": "",
+    "format": " ",
+    "on-click": "/home/mr/.config/rofi/launchers/type-6/launcher.sh",
     "tooltip": false
   },
   "custom/sep": {
@@ -96,14 +132,30 @@
     "tooltip": false
   },
   "custom/power": {
-    "tooltip": false,
+    "tooltip": true,
     "on-click": "hyprexit.sh",
     "format": "⏻ "
   },
+  "dwl/window#layout": {
+    "format": "[{layout}]"
+  },
   "custom/nowplaying": {
     "exec": "~/.config/waybar/scripts/nowplaying.sh",
-    "interval": 2,
+    "interval": 1,
     "return-type": "json",
-    "tooltip": false
-  }
+    "tooltip": true
+  },
+  "network": {
+    "format-wifi": "  {essid}",
+    "format-ethernet": "{ifname}: {ipaddr}/{cidr} ",
+    "format-linked": "{ifname} (No IP) ",
+    "format": "",
+    "format-disconnected": "",
+    "format-alt": "{ifname}: {ipaddr}/{cidr}",
+    "on-click-right": "ghostty  --title='nm' --config-file=$HOME/.config/ghostty/borderless -e impala",
+    "tooltip-format": " {bandwidthUpBits}  {bandwidthDownBits}\n{ifname}\n{ipaddr}/{cidr}\n",
+    "tooltip-format-wifi": " {essid} {frequency}MHz\nStrength: {signaldBm}dBm ({signalStrength}%)\nIP: {ipaddr}/{cidr}\n {bandwidthUpBits}  {bandwidthDownBits}",
+    "interval": 10
+},
+
 }

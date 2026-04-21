@@ -6,6 +6,18 @@ YEAR=$(date +%Y)
 MONTH=$(date +%m)
 FILE="$BASE/$YEAR/$MONTH/$DATE.md"
 
+search() {
+    if [ -z "$2" ]; then
+        echo "Usage: brain search <query> [context lines]"
+        return
+    fi
+
+    query="$2"
+    context="${3:-1}"  # default to 1 line before & after
+
+    rg -C"$context" "$query" "$BASE"
+}
+
 note() {
     mkdir -p "$BASE/$YEAR/$MONTH"
 
@@ -14,8 +26,7 @@ note() {
         sed -i "s/{{date}}/$DATE/" "$FILE"
     fi
 
-    nvim -c "norm Go" \
-      -c "norm Go## $(date +%H:%M):" \
+    nvim -c "norm Go## $(date +%H:%M)" \
       -c "norm Go" \
       -c "norm zz" \
       -c "startinsert" "$FILE"
@@ -54,7 +65,10 @@ case "$1" in
     today)
         today
         ;;
+    search)
+        search "$@"
+        ;;
     *)
-        echo "brain note | brain today"
+        echo "brain {note|today|search}"
         ;;
 esac

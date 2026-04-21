@@ -2,7 +2,7 @@
 
 set -eou pipefail
 
-PLAYER="rmpc --address=localhost:6600"
+PLAYER="rmpc --address=/home/mr/.config/mpd/socket"
 
 ghostty --title="rmpc" --config-file=/home/mr/.config/ghostty/borderless -e $PLAYER >/dev/null &2>1 & disown
 

@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+
+import os
+import re
+import sys
+from pathlib import Path
+
+BIN_EXTENSION = ".avb"
+
+def find_day_directories():
+    """Find all directories matching Dag{nn}_{YYMMDD} pattern."""
+    pattern = re.compile(r'^Dag(\d{2})_(\d{6})$')
+    dirs = []
+    
+    for item in os.listdir('.'):
+        if os.path.isdir(item):
+            match = pattern.match(item)
+            if match:
+                day_num = int(match.group(1))
+                dirs.append((day_num, item))
+    
+    # Sort by day number
+    dirs.sort(key=lambda x: x[0])
+    return [d[1] for d in dirs]
+
+def find_available_bins(project_name):
+    """Find all available project bins in current directory."""
+    bins = []
+    
+    # Check for the unnumbered bin
+    unnumbered = f"{project_name} Bin{BIN_EXTENSION}"
+    if os.path.exists(unnumbered):
+        bins.append(unnumbered)
+    
+    # Check for numbered bins
+    i = 1
+    while True:
+        numbered = f"{project_name} Bin{i}{BIN_EXTENSION}"
+        if os.path.exists(numbered):
+            bins.append(numbered)
+            i += 1
+        else:
+            break
+    
+    return bins
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: avidbins PROJECT_NAME")
+        print("Example: avidbins Klovn11")
+        sys.exit(1)
+    
+    project_name = sys.argv[1]
+    
+    # Find all day directories
+    day_dirs = find_day_directories()
+    
+    if not day_dirs:
+        print("[Error] No day directories found matching pattern Dag{nn}_{YYMMDD}")
+        print("Run mkdirs first to create the directory structure")
+        sys.exit(1)
+    
+    print(f"[Info] Found {len(day_dirs)} day directories")
+    
+    # Calculate bins needed (3 per day: Audio, Video, Sync)
+    bins_needed = len(day_dirs) * 3
+    
+    # Find available bins
+    available_bins = find_available_bins(project_name)
+    bins_available = len(available_bins)
+    
+    print(f"[Info] Bins needed: {bins_needed} (3 per day)")
+    print(f"[Info] Bins available: {bins_available}")
+    
+    if bins_available < bins_needed:
+        shortage = bins_needed - bins_available
+        print(f"\n[Error] {shortage} more bin(s) needed to create Audio, Video and Sync for all days. Exiting.")
+        sys.exit(1)
+    
+    # Process each day directory
+    bin_index = 0
+    suffixes = ["Audio", "Video", "Sync"]
+    
+    for day_dir in day_dirs:
+        for suffix in suffixes:
+            old_name = available_bins[bin_index]
+            new_name = f"{day_dir}_{suffix}{BIN_EXTENSION}"
+            new_path = os.path.join(day_dir, new_name)
+            
+            # Move and rename
+            os.rename(old_name, new_path)
+            print(f"[Info] Moved '{old_name}' -> '{day_dir}/{new_name}'")
+            
+            bin_index += 1
+    
+    print(f"\n[Success] Processed {len(day_dirs)} days, moved {bin_index} bins")
+
+if __name__ == "__main__":
+    main()

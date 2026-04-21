@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# cloud-wrapper.sh
+
+GAME_ID="$1"
+shift
+CONFIG="$HOME/.config/cloud-saves/games.conf"
+CLOUD_BASE="/mnt/data/games/Saved Games"
+echo "RUNCMD: $@"
+echo "Here!"
+
+# Extract the save path for this game from the config
+LOCAL_SAVE=$(awk -F'=' -v game="[$GAME_ID]" '
+  $0 == game { found=1; next }
+  found && /^save=/ { gsub(/"/, "", $2); print $2; exit }
+' "$CONFIG")
+
+[[ -z "$LOCAL_SAVE" ]] && { echo "No config found for $GAME_ID"; exit 1; }
+
+CLOUD_SAVE="$CLOUD_BASE/$GAME_ID"
+
+echo "Checking for cloud saves ..."
+"$HOME/.local/bin/cloud-save.sh" pull "$LOCAL_SAVE" "$CLOUD_SAVE"
+echo "Launching game ..."
+"$@"
+echo "Pushing save game changes ..."
+"$HOME/.local/bin/cloud-save.sh" push "$LOCAL_SAVE" "$CLOUD_SAVE"
+echo "👋 Bye"

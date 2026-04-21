@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# cloud-save.sh <push or pull> <save game path> <cloud destination>
+#
+# Usage:
+# cloud-save.sh <action> <save game path> <cloud destination>
+# Available actions: pull, push
+
 set -euo pipefail
 
 MODE="${1:-}"

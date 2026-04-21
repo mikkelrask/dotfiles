@@ -6,7 +6,7 @@ status=$(playerctl status 2>/dev/null)
 if [[ "$status" == "Playing" ]]; then
     artist=$(playerctl metadata artist)
     title=$(playerctl metadata title)
-    echo "{\"text\": \"$artist - $title\", \"class\": \"playing\"}"
+    echo "{\"text\": \" $artist - $title\", \"class\": \"playing\"}"
 elif [[ "$status" == "Paused" ]]; then
     artist=$(playerctl metadata artist)
     title=$(playerctl metadata title)
