@@ -1,47 +1,30 @@
+#![enable(implicit_some)]
+#![enable(unwrap_newtypes)]
+#![enable(unwrap_variant_newtypes)]
 (
     default_album_art_path: None,
     show_song_table_header: true,
     draw_borders: false,
-    format_tag_separator: " | ",
     browser_column_widths: [20, 38, 42],
-    background_color: None,
-    text_color: None,
+    background_color: "#1e1e2e",
+    text_color: "#cdd6f4",
     header_background_color: None,
-    modal_background_color: None,
-    modal_backdrop: false,
-    preview_label_style: (fg: "yellow"),
-    preview_metadata_group_style: (fg: "yellow", modifiers: "Bold"),
+    modal_background_color: "#11111b",
     tab_bar: (
         enabled: true,
         active_style: (fg: "black", bg: "blue", modifiers: "Bold"),
         inactive_style: (),
     ),
-    highlighted_item_style: (fg: "blue", modifiers: "Bold"),
+    highlighted_item_style: (fg: "#eba0ac", modifiers: "Bold"),
     current_item_style: (fg: "black", bg: "blue", modifiers: "Bold"),
     borders_style: (fg: "blue"),
     highlight_border_style: (fg: "blue"),
-    symbols: (
-        song: "S",
-        dir: "D",
-        playlist: "P",
-        marker: "M",
-        ellipsis: "...",
-        song_style: None,
-        dir_style: None,
-        playlist_style: None,
-    ),
-    level_styles: (
-        info: (fg: "blue", bg: "black"),
-        warn: (fg: "yellow", bg: "black"),
-        error: (fg: "red", bg: "black"),
-        debug: (fg: "light_green", bg: "black"),
-        trace: (fg: "magenta", bg: "black"),
-    ),
+    symbols: (song: "󰎇", dir: "󰉋", marker: " ", ellipsis: "..."),
     progress_bar: (
-        symbols: ["[", "-", ">", " ", "]"],
+        symbols: ["", "", " "],
         track_style: (fg: "#1e2030"),
-        elapsed_style: (fg: "blue"),
-        thumb_style: (fg: "blue", bg: "#1e2030"),
+        elapsed_style: (fg: "#eba0ac"),
+        thumb_style: (fg: "#eba0ac", bg: "#1e2030"),
     ),
     scrollbar: (
         symbols: ["│", "█", "▲", "▼"],
@@ -49,34 +32,39 @@
         ends_style: (),
         thumb_style: (fg: "blue"),
     ),
-    song_table_format: [
+    song_table_format: [ // view in the queue
         (
             prop: (kind: Property(Artist),
                 default: (kind: Text("Unknown"))
             ),
-            width: "20%",
+            width: "15%",
         ),
         (
             prop: (kind: Property(Title),
                 default: (kind: Text("Unknown"))
             ),
-            width: "35%",
+            width: "55%",
         ),
         (
             prop: (kind: Property(Album), style: (fg: "white"),
                 default: (kind: Text("Unknown Album"), style: (fg: "white"))
             ),
-            width: "30%",
+            width: "20%",
+        ),
+        (
+            prop: (kind: Sticker("playCount"), default: (kind: Text("0"))),
+            width: "9",
+            alignment: Right,
+            label: "Playcount"
         ),
         (
             prop: (kind: Property(Duration),
                 default: (kind: Text("-"))
             ),
-            width: "15%",
+            width: "10%",
             alignment: Right,
         ),
     ],
-    components: {},
     layout: Split(
         direction: Vertical,
         panes: [
@@ -112,7 +100,6 @@
                     )
                 ],
                 right: [
-                    (kind: Property(Widget(ScanStatus)), style: (fg: "blue")),
                     (kind: Property(Widget(Volume)), style: (fg: "blue"))
                 ]
             ),
@@ -149,7 +136,7 @@
     browser_song_format: [
         (
             kind: Group([
-                (kind: Property(Track)),
+                (kind: Property(Track)), // track #
                 (kind: Text(" ")),
             ])
         ),
@@ -162,7 +149,5 @@
             default: (kind: Property(Filename))
         ),
     ],
-    lyrics: (
-        timestamp: false
-    )
 )
+

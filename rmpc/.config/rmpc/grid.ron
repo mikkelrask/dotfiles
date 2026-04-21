@@ -6,16 +6,16 @@
     cache_dir: Some("/tmp/rmpc/cache"),
     lyrics_dir: Some("/home/mr/.config/mpd/lyrics"),
     password: None,
-    theme: "bright",
+    theme: "nord",
 
     on_song_change: ["/home/mr/.config/rmpc/increment_play_count"], 
     volume_step: 2,
-    max_fps: 60,
-    scrolloff: 0,
-    wrap_navigation: true,
+    max_fps: 30,
+    scrolloff: 1,
+    wrap_navigation: false,
     enable_mouse: true,
     status_update_interval_ms: 1000,
-    select_current_song_on_change: true,
+    select_current_song_on_change: false,
     browser_column_widths: [20, 38, 42],
     album_art: (
         method: Auto,
@@ -27,9 +27,9 @@
     keybinds: (
         global: {
             ":":       CommandMode,
-            "+":       VolumeDown,
+            ",":       VolumeDown,
             "s":       Stop,
-            "-":       VolumeUp,
+            ".":       VolumeUp,
             "<Tab>":   NextTab,
             "<S-Tab>": PreviousTab,
             "1":       SwitchToTab("Queue"),
@@ -140,7 +140,7 @@
         ),
         (
             name: "Albums",
-            pane: Pane(Albums),
+            pane: Pane(AlbumGrid),
         ),
         (
             name: "Search",
@@ -162,7 +162,7 @@
         framerate: 60, // default 60
         autosens: true, // default true
         sensitivity: 100, // default 100
-        lower_cutoff_freq: 20, // not passed to cava if not provided
+        lower_cutoff_freq: 50, // not passed to cava if not provided
         higher_cutoff_freq: 10000, // not passed to cava if not provided
         input: (
             method: Fifo,
@@ -174,7 +174,7 @@
         smoothing: (
             noise_reduction: 77, // default 77
             monstercat: false, // default false
-            waves: true, // default false
+            waves: false, // default false
         ),
         eq: []
     ),

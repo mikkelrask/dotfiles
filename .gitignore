@@ -3,5 +3,8 @@ nvim/.config/nvim/.undo/
 mpd/.config/mpd/lyric/
 mpd/.config/mpd/lyric/*
 mpd/.config/mpd/lyrics/
+mpd/.config/mpd/database
+mpd/.config/mpd/sticker.sql
 utils/.config/yt-dlp/www.youtube.com_cookies.txt
 utils/.config/yt-dlp
+

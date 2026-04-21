@@ -1,0 +1,221 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LRCLIB_API="https://lrclib.net/api/get"
+LYRICS_LINK_BASE="/home/mr/.config/mpd/lyrics"
+BASE_MUSIC_DIR="/mnt/pool/Music"
+
+usage() {
+    echo "Usage:"
+    echo "  $0 /path/to/Artist/Album"
+    echo "  $0 --single \"Artist Name\" [\"Album Name\"] \"Track Title\""
+    exit 1
+}
+
+get_tag() {
+    local file="$1"
+    local tag="$2"
+    ffprobe -v error -show_entries format_tags="$tag" -of default=noprint_wrappers=1:nokey=1 "$file" || echo ""
+}
+
+# --- API kald for lyrics ---
+get_lyrics_for() {
+    local artist="$1"
+    local album="$2"
+    local title_try="$3"
+
+    if [[ -z "$album" ]]; then
+        curl -sG \
+            --data-urlencode "artist_name=${artist}" \
+            --data-urlencode "track_name=${title_try}" \
+            "$LRCLIB_API" \
+            | jq -r '.syncedLyrics'
+    else
+        curl -sG \
+            --data-urlencode "artist_name=${artist}" \
+            --data-urlencode "track_name=${title_try}" \
+            --data-urlencode "album_name=${album}" \
+            "$LRCLIB_API" \
+            | jq -r '.syncedLyrics'
+    fi
+}
+
+prepend_lrc_tags() {
+    local artist="$1"
+    local album="$2"
+    local title="$3"
+    local lrc_file="$4"
+
+    if ! grep -q '^\[ar:' "$lrc_file"; then
+        local tmpfile
+        tmpfile="$(mktemp)"
+        {
+            echo "[ar:$artist]"
+            echo "[ti:$title]"
+            echo "[al:$album]"
+            echo ""
+            cat "$lrc_file"
+        } > "$tmpfile"
+        mv "$tmpfile" "$lrc_file"
+        echo "→ Prepended metadata tags to: $lrc_file"
+    fi
+}
+
+fetch_for_plain() {
+    local artist="$1"
+    local album="$2"
+    local title_try="$3"
+    local out_lrc="$4"
+
+    local lyrics
+    lyrics="$(get_lyrics_for "$artist" "$album" "$title_try")"
+
+    if [[ "$title_try" == *"("* ]] && { [ -z "$lyrics" ] || [ "$lyrics" == "null" ]; }; then
+        local stripped
+        stripped="$(echo "$title_try" | sed -E 's/ *\([^)]*\)//g')"
+        lyrics="$(get_lyrics_for "$artist" "$album" "$stripped")"
+        title_try="$stripped"
+    fi
+
+    if [ -z "$lyrics" ] || [ "$lyrics" == "null" ]; then
+        echo "✗ No lyrics for: \"$title_try\""
+        return 1
+    fi
+
+    echo "$lyrics" | sed -E '/^\[(ar|al|ti):/d' > "$out_lrc"
+    echo "✔ Saved lyrics: $(basename "$out_lrc")"
+    return 0
+}
+
+symlink_lyrics() {
+    local artist="$1"
+    local title_search="$2"
+    local src_lrc="$3"
+
+    local dest_dir="${LYRICS_LINK_BASE}/${artist}"
+    local dest_lrc="${dest_dir}/${title_search}.lrc"
+
+    mkdir -p "$dest_dir"
+    [ -e "$dest_lrc" ] && rm -f "$dest_lrc"
+    ln -s "$src_lrc" "$dest_lrc"
+    echo "→ Symlink created: $dest_lrc → $src_lrc"
+}
+
+fetch_album() {
+    local album_dir="$1"
+    if [ ! -d "$album_dir" ]; then
+        echo "Error: '$album_dir' is not a directory."
+        exit 1
+    fi
+
+    echo "▶ Fetching lyrics for all supported files in: $album_dir"
+    echo
+
+    shopt -s nullglob
+    for file in "$album_dir"/*.{mp3,flac,m4a,ogg,opus}; do
+        [ -e "$file" ] || continue
+
+        local title_raw title_for_search lrc_file
+        title_raw="$(basename "$file" | sed 's/\.[^.]*$//')"
+        title_for_search="$(echo "$title_raw" | sed -E 's/^[0-9]+[._ -]+//')"
+
+        local artist album
+        artist="$(get_tag "$file" "artist")"
+        album="$(get_tag "$file" "album")"
+
+        # fallback hvis metadata mangler
+        [ -z "$artist" ] && artist="$(basename "$(dirname "$album_dir")")"
+        [ -z "$album" ] && album="$(basename "$album_dir")"
+
+        lrc_file="${file%.*}.lrc"
+
+        if [ -f "$lrc_file" ]; then
+            echo "– Skipping \"$title_raw\" (already have .lrc)"
+            prepend_lrc_tags "$artist" "$album" "$title_for_search" "$lrc_file"
+            symlink_lyrics "$artist" "$title_for_search" "$lrc_file"
+            continue
+        fi
+
+        if fetch_for_plain "$artist" "$album" "$title_for_search" "$lrc_file"; then
+            prepend_lrc_tags "$artist" "$album" "$title_for_search" "$lrc_file"
+            symlink_lyrics "$artist" "$title_for_search" "$lrc_file"
+        else
+            echo "– No lyrics found for \"$title_for_search\""
+        fi
+    done
+
+    echo
+    echo "Done."
+}
+
+fetch_single() {
+    local artist="$1"
+    local album="$2"
+    local title="$3"
+
+    local album_dir=""
+    local lrc_file=""
+    local base_name=""
+
+    if [[ -n "$album" && -d "${BASE_MUSIC_DIR}/${artist}/${album}" ]]; then
+        album_dir="${BASE_MUSIC_DIR}/${artist}/${album}"
+
+        local safe_title_regex
+        safe_title_regex="$(echo "$title" | sed -E 's/[][().*?+^$]/\\&/g')"
+
+        local song_file
+        song_file=$(find "$album_dir" -maxdepth 1 -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.opus" \) \
+            -regex ".*$safe_title_regex.*" | head -n 1)
+
+        if [[ -n "$song_file" ]]; then
+            base_name="$(basename "$song_file" | sed 's/\.[^.]*$//')"
+            lrc_file="${album_dir}/${base_name}.lrc"
+
+            artist="$(get_tag "$song_file" "artist" || echo "$artist")"
+            album="$(get_tag "$song_file" "album" || echo "$album")"
+        fi
+    fi
+
+    # Hvis vi ikke fandt en musikfil i albummet, fallback til lyrics mappe
+    if [[ -z "$lrc_file" ]]; then
+        local lyrics_dir="${LYRICS_LINK_BASE}/${artist}"
+        mkdir -p "$lyrics_dir"
+        local safe_title="${title// /_}"
+        lrc_file="${lyrics_dir}/${safe_title}.lrc"
+    fi
+
+    if [ -f "$lrc_file" ]; then
+        echo "– Skipping \"$title\" (already have .lrc)"
+        prepend_lrc_tags "$artist" "$album" "$title" "$lrc_file"
+        symlink_lyrics "$artist" "$title" "$lrc_file"
+        return 0
+    fi
+
+    if fetch_for_plain "$artist" "$album" "$title" "$lrc_file"; then
+        prepend_lrc_tags "$artist" "$album" "$title" "$lrc_file"
+        symlink_lyrics "$artist" "$title" "$lrc_file"
+        return 0
+    else
+        echo "– No lyrics found for \"$title\""
+        return 1
+    fi
+}
+
+# ---- Argument parser ----
+
+if [[ $# -eq 1 ]]; then
+    fetch_album "$1" && notify-send "lyrics-fetch" "Tilgængelige sangtekster hentet til $1"
+elif [[ "$1" == "--single" ]]; then
+    if [[ $# -eq 3 ]]; then
+        fetch_single "$2" "" "$3"
+    elif [[ $# -eq 4 ]]; then
+        fetch_single "$2" "$3" "$4"
+    else
+        usage
+    fi
+    if [[ "$?" == 0 ]]; then
+        notify-send "lyrics-fetch" "Sangtekster hentet til $2 - $3"
+    fi
+else
+    usage
+fi
