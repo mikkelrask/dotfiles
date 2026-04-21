@@ -2,6 +2,7 @@
 #![enable(unwrap_newtypes)]
 #![enable(unwrap_variant_newtypes)]
 (
+    address: "/home/mr/.config/mpd/socket",
     cache_dir: Some("/tmp/rmpc/cache"),
     lyrics_dir: Some("/home/mr/.config/mpd/lyrics"),
     password: None,
