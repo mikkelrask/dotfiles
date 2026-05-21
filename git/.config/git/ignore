@@ -19,7 +19,7 @@ node_modules/
 dist/
 .next/
 out/
-build/
+# build/ (removed due to electron-builder expecting it for my electron app)
 .vercel
 next-env.d.ts
 tsconfig.*

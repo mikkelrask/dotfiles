@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+BASE="$HOME/.brain/diary"
+DATE=$(date +%Y-%m-%d)
+YEAR=$(date +%Y)
+MONTH=$(date +%m)
+FILE="$BASE/$YEAR/$MONTH/$DATE.md"
+
+note() {
+    mkdir -p "$BASE/$YEAR/$MONTH"
+
+    if [ ! -f "$FILE" ]; then
+        cp ~/.brain/templates/daily.md "$FILE"
+        sed -i "s/{{date}}/$DATE/" "$FILE"
+    fi
+
+    nvim -c "norm Go" \
+      -c "norm Go## $(date +%H:%M):" \
+      -c "norm Go" \
+      -c "norm zz" \
+      -c "startinsert" "$FILE"
+}
+
+today() {
+
+    if [ ! -f "$FILE" ]; then
+        echo "⚠ brain today: empty"
+        echo "run: brain note"
+        return
+    fi
+
+    sleep=$(grep "^sleep:" "$FILE" | awk '{print $2}')
+    meds=$(grep "^meds:" "$FILE" | awk '{print $2}')
+    mood=$(grep "^mood:" "$FILE" | awk '{print $2}')
+
+    todos=$(grep -c "\- \[ \]" "$FILE")
+
+    lastnote=$(grep -E '^#+ [0-9]{2}:[0-9]{2}' "$FILE" | tail -1 | awk '{print $2}')
+
+    echo "┌─ brain today ─────────────"
+    printf "Sleep: %s\n" "${sleep:-?}"
+    printf "Meds:  %s\n" "${meds:-?}"
+    printf "Mood:  %s\n" "${mood:-?}"
+    echo
+    printf "Todos: %s\n" "$todos"
+    printf "Last note: %s\n" "${lastnote:-none}"
+    echo "────────────────────────────"
+}
+
+case "$1" in
+    note)
+        note
+        ;;
+    today)
+        today
+        ;;
+    *)
+        echo "brain note | brain today"
+        ;;
+esac

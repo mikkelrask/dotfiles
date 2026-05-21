@@ -1,6 +1,13 @@
 #!/usr/bin/env sh
+STATE_FILE="$HOME/.config/rmpc/selected_server"
 
-rmpc song | /home/mr/dotfiles/utils/.local/bin/player-notification.sh 2>/dev/null
+if [[ -f "$STATE_FILE" ]]; then
+  PLAYER_ARGS="--address=delos:6600"
+else
+  PLAYER_ARGS=""
+fi
+
+rmpc "$PLAYER_ARGS" song | /home/mr/dotfiles/utils/.local/bin/player-notification.sh 2>/dev/null
 
 sticker=$(rmpc sticker get "$FILE" "playCount" | jq -r '.value')
 if [ -z "$sticker" ]; then

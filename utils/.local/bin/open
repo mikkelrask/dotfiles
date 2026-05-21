@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [[ "${#1}" -gt 30 ]];
+then
+link="${1:0:20}"..."${1: -7}"
+else
+link="$1"
+fi
+
+echo "$link"
+
+x=$(echo -e "mpv\nfeh\nBrowser\nTUIBrowser\nTerminal\nFilebrowser\nwget\nTV\nNest" | wofi --dmenu -i -p "What to do?")
+case "$x" in
+		mpv) /usr/bin/devour mpv "$1" 2&>/dev/null & disown ;;
+		Browser) librewolf "$1" ;;
+		TUIBrowser) $TERMINAL --title="rmpc" -e "readable $1 | w3m -T text/html 2>/dev/null" &;;
+    Filebrowser) $TERMINAL -e yazi "$1" ;;
+		Terminal) $TERMINAL -e "$1";;
+		wget) wget "$1" 2&>/dev/null & disown ;;
+		TV) castnow --address 192.168.1.209 --quiet "$1" ;;
+		Nest) castnow --address 192.168.1.104 --quiet - "$1" ;;
+esac
+

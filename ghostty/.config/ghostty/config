@@ -1,15 +1,15 @@
 #font-family = "FantasqueSansM Nerd Font Propo"
 #font-family = "IosevkaTerm NF"
 font-family = "CaskaydiaCove NF"
-font-size = 16
-background-opacity = 0.8
-window-decoration = false
+font-size = 14
+background-opacity = 0.97
+window-decoration = true
 shell-integration = zsh
 window-padding-x = 12
 window-padding-y = 12
 mouse-hide-while-typing = true
 #grapheme-width-method = legacy
-theme = "tokyonight"
+theme = "Vesper"
 
 
 #custom-shader=./ghostty-shaders/animated-gradient-shader.glsl

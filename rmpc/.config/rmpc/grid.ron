@@ -12,10 +12,10 @@
     volume_step: 2,
     max_fps: 30,
     scrolloff: 1,
-    wrap_navigation: true,
+    wrap_navigation: false,
     enable_mouse: true,
     status_update_interval_ms: 1000,
-    select_current_song_on_change: true,
+    select_current_song_on_change: false,
     browser_column_widths: [20, 38, 42],
     album_art: (
         method: Auto,
@@ -140,7 +140,7 @@
         ),
         (
             name: "Albums",
-            pane: Pane(Albums),
+            pane: Pane(AlbumGrid),
         ),
         (
             name: "Search",
