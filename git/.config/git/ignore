@@ -8,8 +8,6 @@ ENV
 .pytest_cache
 __pycache__
 .ruff_cache
-lib/
-lib64/
 
 # Rust
 target/
@@ -23,5 +21,5 @@ out/
 .vercel
 next-env.d.ts
 tsconfig.*
-
+AGENTS.md
 

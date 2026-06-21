@@ -9,7 +9,7 @@ fi
 
 echo "$link"
 
-x=$(echo -e "mpv\nfeh\nBrowser\nTUIBrowser\nTerminal\nFilebrowser\nwget\nTV\nNest" | wofi --dmenu -i -p "What to do?")
+x=$(echo -e "mpv\nfeh\nBrowser\nTUIBrowser\nTerminal\nFilebrowser\nwget\nTV\nNest" | rofi --dmenu -i -p "What to do?")
 case "$x" in
 		mpv) /usr/bin/devour mpv "$1" 2&>/dev/null & disown ;;
 		Browser) librewolf "$1" ;;

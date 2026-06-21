@@ -1,48 +1,105 @@
 #!/usr/bin/env bash
-# gwt — “git worktree in tmux”
-#  ▸ gwt NAME          → create/reuse worktrees/NAME
-#  ▸ gwt               → pick an existing work-tree with fzf
+# gwt — "git worktree in tmux"
+#  ▸ gwt <NAME|ISSUE#>   → create/reuse worktrees/NAME, optionally fetch GH issue + plan
+#  ▸ gwt                 → pick an existing work-tree with fzf
 
 set -euo pipefail
 
 ################################################################################
-# 0 · ensure we’re inside a Git repo and move to its root
+# 0 · ensure we're inside a Git repo and move to its root
 ################################################################################
 root=$(git -C . rev-parse --show-toplevel 2>/dev/null) || {
   echo "gwt: not inside a Git repository" >&2
   exit 1
 }
 cd "$root"
-mkdir -p worktrees/ # folder that holds our work-trees
+mkdir -p worktrees/
 
 ################################################################################
-# 1 · pick/create the work-tree
+# helpers
+################################################################################
+is_issue_number() { [[ $1 =~ ^[0-9]+$ ]]; }
+
+fetch_issue_and_plan() {
+  local issue_num=$1 wtdir=$2
+  local issue_file="$wtdir/issue${issue_num}.md"
+  local plan_file="$wtdir/plan${issue_num}.md"
+
+  # --- fetch issue via gh ---
+  if command -v gh >/dev/null 2>&1; then
+    echo "gwt: fetching issue #${issue_num}…"
+    gh issue view "$issue_num" --json number,title,body,labels,comments \
+      --template '# Issue #{{.number}}: {{.title}}
+
+## Labels
+{{range .labels}}  - {{.name}}
+{{end}}
+
+## Description
+{{.body}}
+
+## Comments
+{{range .comments}}---
+**{{.author.login}}** ({{.createdAt}}):
+{{.body}}
+
+{{end}}' >"$issue_file" && echo "gwt: issue saved → $issue_file" \
+      || { echo "gwt: gh fetch failed (continuing without issue file)" >&2; return; }
+  else
+    echo "gwt: gh not found, skipping issue fetch" >&2
+    return
+  fi
+
+  # --- generate plan via opencode ---
+  if command -v opencode >/dev/null 2>&1; then
+    echo "gwt: generating plan with opencode…"
+    (
+      cd "$wtdir"
+      opencode --prompt "Read @issue${issue_num}.md carefully.
+
+Produce a thorough, ordered execution plan and save it as plan${issue_num}.md.
+
+The plan should include:
+1. A one-paragraph summary of what needs to be done and why
+2. Numbered implementation steps, each with enough detail to act on
+3. A 'Gotchas & footguns' section — edge cases, risky assumptions, subtle breakage
+4. Open questions that need answering before or during implementation
+
+Be direct and specific. Reference concrete files, functions, or APIs where you can infer them from context."
+    ) && echo "gwt: plan saved → $plan_file" \
+      || echo "gwt: opencode plan generation failed (continuing)" >&2
+  else
+    echo "gwt: opencode not found, skipping plan generation" >&2
+  fi
+}
+
+################################################################################
+# 1 · pick/create the work-tree
 ################################################################################
 if [[ $# -eq 0 ]]; then
-  # interactive *pick* via fzf
   command -v fzf >/dev/null 2>&1 || {
     echo "gwt: fzf not found (needed for interactive selection)" >&2
     exit 1
   }
 
-  # list all work-tree paths (absolute) and feed them to fzf
   wtdir=$(git worktree list --porcelain |
     awk '/^worktree / {print $2}' |
     fzf --prompt='Worktree ❯ ' --exit-0)
 
-  [[ -n ${wtdir:-} ]] || exit 0 # user pressed <Esc>
-  name=$(basename "$wtdir")     # eg. worktrees/feature → feature
+  [[ -n ${wtdir:-} ]] || exit 0
+  name=$(basename "$wtdir")
+  issue_num="" # picking existing — skip issue fetch
 else
-  # create/reuse worktrees/NAME
   name=$1
   wtdir="$root/worktrees/$name"
+  issue_num=$(is_issue_number "$name" && echo "$name" || echo "")
 fi
 
-window="$name"      # tmux window name
-session="worktrees" # tmux session that herds all work-trees
+window="$name"
+session="worktrees"
 
 ################################################################################
-# 2 · figure out the repo’s default branch for *new* work-trees
+# 2 · default branch
 ################################################################################
 if git branch --format='%(refname:short)' | grep -q '^master$'; then
   main_branch=master
@@ -51,23 +108,43 @@ else
 fi
 
 ################################################################################
-# 3 · one shared snippet we’ll send to tmux
+# 3 · create the worktree directory early so we can write files into it
+################################################################################
+if [[ ! -d "$wtdir" ]]; then
+  echo "gwt: creating worktree '$name'…"
+  if git branch --format='%(refname:short)' | grep -Fxq "$name"; then
+    git worktree add "$wtdir" "$name"
+  else
+    git worktree add -b "$name" "$wtdir" "$main_branch"
+  fi
+else
+  echo "gwt: worktree '$name' already exists, reusing"
+fi
+###############################################################################
+# 4 · fetch issue + generate plan (runs in foreground before tmux attach)
+################################################################################
+if [[ -n $issue_num ]]; then
+  issue_file="$wtdir/issue${issue_num}.md"
+  plan_file="$wtdir/plan${issue_num}.md"
+
+  if [[ ! -f "$plan_file" ]]; then
+    fetch_issue_and_plan "$issue_num" "$wtdir"
+  else
+    echo "gwt: plan already exists at $plan_file, skipping"
+  fi
+fi
+################################################################################
+# 5 · tmux setup snippet (worktree already exists, just cd into it)
 ################################################################################
 setup_worktree=$(
   cat <<EOF
-cd "$root"
-if [ -d "$wtdir/.git" ]; then
-  cd "$wtdir"
-else
-  git worktree add -b "$name" "$wtdir" $main_branch
-  cd "$wtdir"
-fi
+cd "$wtdir"
 exec \$SHELL
 EOF
 )
 
 ################################################################################
-# 4 · inside-tmux vs. outside-tmux workflow
+# 6 · inside-tmux vs. outside-tmux workflow
 ################################################################################
 if [[ -n ${TMUX:-} ]]; then
   tmux rename-window "$window"

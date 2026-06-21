@@ -20,6 +20,10 @@ if [ -d "$HOME/.npm-global" ]; then
   PATH="$HOME/.npm-global/bin:$PATH"
 fi
 
+if [ -d "$HOME/.pi/agent/npm/node_modules/.bin" ]; then
+  PATH="$HOME/.pi/agent/npm/node_modules/.bin:$PATH"
+fi
+
 if [ -d "$HOME/.cargo/bin" ]; then
   PATH="$HOME/.cargo/bin:$PATH"
 fi
@@ -28,6 +32,8 @@ if [ -f "$HOME/.fzf-keybinds.zsh" ]; then
   source "$HOME/.fzf-keybinds.zsh"
 fi
 
+export PATH="$PATH:/home/mr/.lmstudio/bin"
+export PATH="/home/mr/.opencode/bin:$PATH"
 export BROWSER=librewolf
 export FILES=dolphin
 export VISUAL=nvim

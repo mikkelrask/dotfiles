@@ -26,11 +26,8 @@ source <(fzf --zsh)
 source "$HOME/.zshenv"
 PATH="$PATH:/home/mr/.local/share/nvim/site/"
 brain today
+
 export LD_LIBRARY_PATH=/opt/rocm/lib:$LD_LIBRARY_PATH
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/home/mr/.lmstudio/bin"
-# End of LM Studio CLI section
 
-# opencode
-export PATH=/home/mr/.opencode/bin:$PATH
+setopt nonomatch

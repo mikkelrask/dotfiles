@@ -1,5 +1,5 @@
 configuration {
-  modes: "window,drun,ssh,emoji";
+  modes: "run,window,drun,ssh";
 /*	font: "mono 12";*/
 /*	location: 0;*/
 /*	yoffset: 0;*/
